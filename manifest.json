@@ -1,0 +1,33 @@
+{
+  "manifest_version": 4,
+  "type": "extension",
+  "name": "LLTemplate-Vite",
+  "slug": "LLTemplate-Vite",
+  "description": "A plugin template for LiteLoaderQQNT, powered by Vite & Typescript",
+  "version": "1.0.0",
+  "icon": null,
+  "authors": [
+    {
+      "name": "MisaLiu",
+      "link": "https://github.com/MisaLiu"
+    }
+  ],
+  "platform": [
+    "win32",
+    "linux",
+    "darwin"
+  ],
+  "injects": {
+    "main": "./main/index.js",
+    "preload": "./preload/index.js",
+    "renderer": "./renderer/index.js"
+  },
+  "repository": {
+    "repo": "MisaLiu/LietLoaderQQNT-PluginTemplate-Vite",
+    "branch": "master",
+    "release": {
+      "tag": "1.0.0",
+      "file": "LLTemplate-Vite"
+    }
+  }
+}

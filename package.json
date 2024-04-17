@@ -1,0 +1,25 @@
+{
+  "name": "lltemplate-vite",
+  "version": "1.0.0",
+  "description": "A plugin template for LiteLoaderQQNT, powered by Vite & Typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint --fix src/**/* --ext .js,.ts",
+    "build": "npx electron-vite build"
+  },
+  "author": "MisaLiu",
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "@electron-toolkit/eslint-config-ts": "^1.0.1",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "electron": "^29.1.4",
+    "electron-vite": "^2.1.0",
+    "eslint": "^8.57.0",
+    "unplugin-zip-pack": "^1.0.1",
+    "vite-plugin-checker": "^0.6.4",
+    "vite-plugin-cp": "^4.0.8"
+  }
+}
