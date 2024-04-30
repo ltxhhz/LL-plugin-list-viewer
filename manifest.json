@@ -1,15 +1,15 @@
 {
+  "$schema": "./manifest_schema.json",
   "manifest_version": 4,
   "type": "extension",
-  "name": "LLTemplate-Vite",
-  "slug": "LLTemplate-Vite",
-  "description": "A plugin template for LiteLoaderQQNT, powered by Vite & Typescript",
+  "name": "插件列表查看",
+  "slug": "list-viewer",
+  "description": "插件列表查看",
   "version": "1.0.0",
-  "icon": null,
   "authors": [
     {
-      "name": "MisaLiu",
-      "link": "https://github.com/MisaLiu"
+      "name": "ltxhhz",
+      "link": "https://github.com/ltxhhz"
     }
   ],
   "platform": [

@@ -1,0 +1,89 @@
+<style>
+  img.icon {
+    max-width: 60px;
+    border-radius: 10px;
+  }
+
+  .authors {
+    display: inline-flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .authors a {
+    color: #81adef;
+    cursor: pointer;
+  }
+
+  .manipulate {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .failed,
+  .uninstall,
+  .update,
+  .inactive-tag,
+  .newer-version {
+    display: none;
+  }
+
+  :host([data-failed]) .failed {
+    display: unset;
+  }
+
+  :host([data-failed]) .success {
+    display: none;
+  }
+
+  :host([data-installed='1']) .uninstall {
+    display: unset;
+  }
+
+  :host([data-installed='1']) .install {
+    display: none;
+  }
+
+  :host([data-update='1']) .update {
+    display: unset;
+  }
+
+  :host([data-update='1']) .newer-version {
+    display: inline;
+    color: skyblue;
+    padding-left: 5px;
+  }
+
+  :host([data-inactive='1']) .inactive-tag {
+    display: inline;
+  }
+</style>
+<setting-item data-direction="row">
+  <div>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px">
+      <img class="icon" src="local://root/src/setting/static/default.png" />
+      <div>
+        <setting-text>
+          <span class="title" title="插件名">插件名</span>
+          <span class="inactive-tag">（未激活）</span>
+        </setting-text>
+        <setting-text data-type="secondary">
+          <span class="description" title="插件描述">插件描述</span>
+        </setting-text>
+      </div>
+    </div>
+    <setting-text data-type="secondary">
+      <span style="margin-right: 50px;">版本：<span class="version">版本</span><span class="newer-version"></span>
+      </span>
+      <span>开发：<span class="authors"></span></span>
+    </setting-text>
+  </div>
+  <div class="manipulate">
+    <setting-button class="success update">更新</setting-button>
+    <setting-button class="success install">安装</setting-button>
+    <setting-button class="success uninstall" data-type="secondary">卸载</setting-button>
+    <setting-button class="failed retry">重试</setting-button>
+    <setting-button class="detail" data-type="secondary">详情</setting-button>
+  </div>
+</setting-item>

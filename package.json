@@ -13,6 +13,7 @@
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/superagent": "^8.1.6",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "electron": "^29.1.4",
@@ -21,5 +22,11 @@
     "unplugin-zip-pack": "^1.0.1",
     "vite-plugin-checker": "^0.6.4",
     "vite-plugin-cp": "^4.0.8"
+  },
+  "dependencies": {
+    "compare-versions": "^6.1.0",
+    "node-fetch": "^3.3.2",
+    "node-stream-zip": "^1.15.0",
+    "superagent": "^9.0.1"
   }
 }

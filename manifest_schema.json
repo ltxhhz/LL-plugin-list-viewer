@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LiteLoaderQQNT Plugin manifest",
+  "properties": {
+    "manifest_version": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "default": 4,
+      "title": "menifest文件版本",
+      "description": "当前版本为 4"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "extension",
+        "theme",
+        "framework"
+      ],
+      "title": "插件类型"
+    },
+    "name": {
+      "type": "string",
+      "title": "插件名字"
+    },
+    "slug": {
+      "type": "string",
+      "title": "代码内标识"
+    },
+    "description": {
+      "type": "string",
+      "title": "插件描述"
+    },
+    "icon": {
+      "title": "插件图标",
+      "description": "写入相对路径字符串，也可以是 null",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "thumb": {
+      "title": "设置选项图标",
+      "description": "写入相对路径字符串，也可以是 null",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "version": {
+      "type": "string",
+      "title": "版本号",
+      "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$"
+    },
+    "authors": {
+      "title": "作者们的信息",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "作者名字",
+            "type": "string"
+          },
+          "link": {
+            "title": "作者链接",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "name",
+          "link"
+        ]
+      }
+    },
+    "dependencies": {
+      "title": "插件依赖项",
+      "description": "写入插件slug名",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "platform": {
+      "title": "插件支持的系统平台",
+      "description": " - Windows: win32 \n - Linux: linux \n - MacOS: darwin",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "win32",
+          "linux",
+          "darwin"
+        ],
+        "uniqueItems": true
+      }
+    },
+    "injects": {
+      "title": "要注入的脚本",
+      "type": "object",
+      "properties": {
+        "renderer": {
+          "title": "渲染进程",
+          "type": "string"
+        },
+        "main": {
+          "title": "主进程",
+          "type": "string"
+        },
+        "preload": {
+          "title": "预加载脚本",
+          "type": "string"
+        }
+      }
+    },
+    "repository": {
+      "title": "插件仓库信息",
+      "type": "object",
+      "properties": {
+        "repo": {
+          "title": "仓库短地址",
+          "type": "string"
+        },
+        "branch": {
+          "title": "分支名称",
+          "type": "string"
+        },
+        "release": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "title": "tag 名称",
+              "description": "不推荐写 latest",
+              "type": "string"
+            },
+            "file": {
+              "title": "release 内的文件名",
+              "description": "不填会直接下载 tag 的源码",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tag"
+          ]
+        }
+      },
+      "required": [
+        "repo",
+        "branch"
+      ]
+    }
+  },
+  "required": [
+    "manifest_version",
+    "name",
+    "slug",
+    "description",
+    "version",
+    "authors",
+    "platform"
+  ]
+}
