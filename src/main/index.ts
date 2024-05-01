@@ -138,7 +138,7 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
       success: true,
     }
   } catch (error: any) {
-    dialog.showErrorBox('插件商店', error.stack || error.message)
+    dialog.showErrorBox('插件列表查看', error.stack || error.message)
     // 安装失败删除文件
     fs.rmSync(plugin_path, { recursive: true, force: true })
     if (error.message.includes('Bad archive')) {

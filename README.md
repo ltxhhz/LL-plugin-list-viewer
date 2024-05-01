@@ -21,6 +21,24 @@
 2. 将文件夹移动至 `LiteLoaderQQNT数据目录/plugins/` 下面
 3. 重启 QQNT
 
+### 使用 git clone
+
+1. clone 本仓库 `git clone https://github.com/ltxhhz/LL-plugin-list-viewer.git`
+2. 运行以下命令
+```bash
+npm i
+npm run build
+```
+3. 如果clone到了 `plugins` 目录下，修改 `manifest.json` 中`inject` 为
+```json
+"injects": {
+    "main": "./dist/main/index.js",
+    "preload": "./dist/preload/index.js",
+    "renderer": "./dist/renderer/index.js"
+}
+```
+>否则可以将 `dist` 目录移动到 `LiteLoaderQQNT数据目录/plugins/` 目录下
+
 ## 鸣谢
 
 - [ltxhhz](https://github.com/ltxhhz) 辛苦我了
