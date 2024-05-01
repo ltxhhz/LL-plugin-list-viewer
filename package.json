@@ -1,15 +1,15 @@
 {
-  "name": "lltemplate-vite",
+  "name": "list-viewer",
   "version": "1.0.0",
-  "description": "A plugin template for LiteLoaderQQNT, powered by Vite & Typescript",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint --fix src/**/* --ext .js,.ts",
     "build": "npx electron-vite build"
   },
-  "author": "MisaLiu",
-  "license": "GPL-3.0-only",
+  "author": "ltxhhz",
+  "license": "MIT",
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
@@ -25,8 +25,6 @@
   },
   "dependencies": {
     "compare-versions": "^6.1.0",
-    "node-fetch": "^3.3.2",
-    "node-stream-zip": "^1.15.0",
-    "superagent": "^9.0.1"
+    "node-stream-zip": "^1.15.0"
   }
 }
