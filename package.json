@@ -1,12 +1,16 @@
 {
   "name": "list-viewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint --fix src/**/* --ext .js,.ts",
-    "build": "npx electron-vite build"
+    "build": "npx electron-vite build",
+    "build-test": "npm run build && xcopy .\\dist\\* \"..\\..\\work space\\LiteLoaderQQNT\\plugins\\list-viewer\\\" /S /Y",
+    "bump-patch": "node bump.cjs --patch",
+    "bump-minor": "node bump.cjs --minor",
+    "bump-major": "node bump.cjs --major"
   },
   "author": "ltxhhz",
   "license": "MIT",

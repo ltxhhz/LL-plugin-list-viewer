@@ -4,8 +4,8 @@
   "type": "extension",
   "name": "插件列表查看",
   "slug": "list-viewer",
-  "description": "插件列表查看",
-  "version": "1.0.0",
+  "description": "插件列表查看·安装·更新",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "ltxhhz",
@@ -24,10 +24,6 @@
   },
   "repository": {
     "repo": "MisaLiu/LietLoaderQQNT-PluginTemplate-Vite",
-    "branch": "master",
-    "release": {
-      "tag": "1.0.0",
-      "file": "LLTemplate-Vite"
-    }
+    "branch": "master"
   }
 }

@@ -1,14 +1,15 @@
 import { compare } from 'compare-versions'
 import { HandleResult, Plugin, PluginList } from '../global'
 
-import { localFetch } from './utils'
+import { fetchWithTimeout, localFetch } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
   branch: 'v4',
   file: 'plugins.json',
 }
-// let currentMirror = ''
+
+const defaultIcon = 'local://root/src/setting/static/default.png'
 
 const domParser = new DOMParser()
 const thisSlug = 'list-viewer'
@@ -316,9 +317,18 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
               )
               break
             }
-            case 'data-icon': //todo
-              this.iconEl!.src = newValue || 'local://root/src/setting/static/default.png'
+            case 'data-icon': {
+              const [src, src1] = (newValue || '').split(',')
+              this.iconEl!.src = src || defaultIcon
+              this.iconEl!.addEventListener('error', () => {
+                if (src1) {
+                  this.iconEl!.src = src1
+                } else {
+                  this.iconEl!.src = defaultIcon
+                }
+              })
               break
+            }
             default:
               break
           }
@@ -365,6 +375,8 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
     el.dataset.authors = JSON.stringify(manifest.authors)
     el.dataset.installed = LiteLoader.plugins[manifest.slug] ? '1' : ''
     el.dataset.slug = manifest.slug
+    el.dataset.icon = getIconUrls(pluginList[Number(el.dataset.index)], manifest).toString()
+    el.dataset.defaultIcon = defaultIcon
     delete el.dataset.failed
     if (LiteLoader.plugins[manifest.slug]) {
       el.dataset.version = LiteLoader.plugins[manifest.slug].manifest.version
@@ -390,12 +402,12 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
 async function getList(noCache = false): Promise<PluginList> {
   let url
   try {
-    return await fetch((url = `https://cdn.jsdelivr.net/gh/${listUrl.repo}@${listUrl.branch.replace(/^v(?!v)/, 'vv')}/${listUrl.file}`), {
+    return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${listUrl.repo}@${listUrl.branch.replace(/^v(?!v)/, 'vv')}/${listUrl.file}`), {
       cache: noCache ? 'no-cache' : 'default',
     }).then(res => (res.status === 200 ? res.json() : null))
   } catch (err) {
     console.warn(`getList jsdelivr ${url}`, err)
-    return await fetch(`${getGithubMirrors()}https://raw.githubusercontent.com/${listUrl.repo}/${listUrl.branch}/${listUrl.file}`, {
+    return await fetchWithTimeout(`${getGithubMirrors()}https://raw.githubusercontent.com/${listUrl.repo}/${listUrl.branch}/${listUrl.file}`, {
       cache: noCache ? 'no-cache' : 'default',
     })
       .then(res => (res.status === 200 ? res.json() : null))
@@ -409,12 +421,12 @@ async function getList(noCache = false): Promise<PluginList> {
 async function getManifest(item: Plugin, noCache = false): Promise<Manifest | null> {
   let url
   try {
-    return await fetch((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
+    return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
       cache: noCache ? 'no-cache' : 'default',
     }).then(res => (res.status === 200 ? res.json() : null))
   } catch (err) {
     console.warn(`getManifest jsdelivr ${url}`, err)
-    return await fetch((url = `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
+    return await fetchWithTimeout((url = `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
       cache: noCache ? 'no-cache' : 'default',
     })
       .then(res => (res.status === 200 ? res.json() : null))
@@ -441,6 +453,16 @@ async function install(release = false): Promise<HandleResult> {
   return ListViewer.getPkg(currentManifest.slug, getGithubMirrors() + url)
 }
 
+function getIconUrls(item: Plugin, manifest: Manifest): [string?, string?] {
+  if (manifest.icon) {
+    return [
+      `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/${manifest.icon.replace(/^\.?\//, '')}`,
+      `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/${manifest.icon.replace(/^\.?\//, '')}`,
+    ]
+  }
+  return []
+}
+
 function uninstall() {
   return ListViewer.removePkg(currentManifest.slug)
 }
@@ -457,7 +479,7 @@ function getArchiveUrl(item: Plugin) {
 }
 
 async function getLatestReleaseUrl(item: Plugin) {
-  const body = await fetch(`https://api.github.com/repos/${item.repo}/releases/latest`).then(e => e.json())
+  const body = await fetchWithTimeout(`https://api.github.com/repos/${item.repo}/releases/latest`).then(e => e.json())
   const zipFile = body.assets.find(asset => asset.name.endsWith('.zip'))
   return zipFile.browser_download_url
 }

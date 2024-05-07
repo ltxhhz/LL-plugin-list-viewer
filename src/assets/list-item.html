@@ -2,6 +2,18 @@
   img.icon {
     max-width: 60px;
     border-radius: 10px;
+    position: relative;
+  }
+
+  img.icon::after {
+    content: "";
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: url(local://root/src/setting/static/default.png) no-repeat center;
+    background-size: 100%;
   }
 
   .authors {
