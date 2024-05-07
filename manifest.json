@@ -23,7 +23,7 @@
     "renderer": "./renderer/index.js"
   },
   "repository": {
-    "repo": "MisaLiu/LietLoaderQQNT-PluginTemplate-Vite",
+    "repo": "ltxhhz/LL-plugin-list-viewer",
     "branch": "master"
   }
 }
