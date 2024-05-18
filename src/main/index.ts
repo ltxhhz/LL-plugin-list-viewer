@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, IpcMainEvent, dialog, IpcMainInvokeEvent } from 'electron'
+import { ipcMain, IpcMainEvent, dialog, IpcMainInvokeEvent } from 'electron'
 import { GlobalMethods, HandleResult } from '../global'
 import fs from 'fs'
 import path from 'path'
@@ -16,11 +16,11 @@ const handle = <K extends keyof GlobalMethods['ListViewer']>(channel: K, cb: (e:
 //   console.log(window)
 // }
 
-listen('log', (e, args) => {
+listen('log', (_, args) => {
   output(args)
 })
 
-handle('getPkg', async (e, slug, url) => {
+handle('getPkg', async (_, slug, url) => {
   output('安装', slug, url)
   return await request(url).then(res => {
     output('下载完成', slug)

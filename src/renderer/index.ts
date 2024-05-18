@@ -29,6 +29,12 @@ interface Config {
   inactivePlugins: string[]
 }
 
+const typeMap = {
+  extension: '扩展',
+  theme: '主题',
+  framework: '框架'
+}
+
 let config: Config
 
 let pluginList: PluginList
@@ -38,7 +44,6 @@ let showDialog: (option: DialogOptions) => Promise<boolean>
 let filterInput: HTMLInputElement
 
 export function onSettingWindowCreated(view: HTMLElement) {
-  console.log('Setting window has just been created')
   ;(
     LiteLoader.api.config.get(thisSlug, {
       inactivePlugins: [],
@@ -53,9 +58,9 @@ export function onSettingWindowCreated(view: HTMLElement) {
       filterInput = doms.querySelector<HTMLInputElement>('#list-search')!
       const refreshBtn = doms.querySelector<HTMLButtonElement>('.refresh-btn')!
       const dialogInstall = doms.querySelector<HTMLDialogElement>('.list-dialog-install')!
-      const dialogClose = doms.querySelector<HTMLButtonElement>('.list-dialog-btn-close')!
+      const dialogInstallClose = doms.querySelector<HTMLButtonElement>('.list-dialog-install-btn-close')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
-      dialogClose.addEventListener('click', () => {
+      dialogInstallClose.addEventListener('click', () => {
         dialogInstall.close()
         resFunc()
       })
@@ -73,6 +78,10 @@ export function onSettingWindowCreated(view: HTMLElement) {
       })
       let dialogResolve: (value: boolean) => void
       const dialog = doms.querySelector<HTMLDialogElement>('.list-dialog')!
+      const dialogClose = doms.querySelector<HTMLButtonElement>('.list-dialog-btn-close')!
+      dialogClose.addEventListener('click', () => {
+        dialog.close()
+      })
       const dialogTitle = doms.querySelector<HTMLDivElement>('.list-dialog-title')!
       const dialogContent = doms.querySelector<HTMLDivElement>('.list-dialog-content')!
       const dialogConfirm = doms.querySelector<HTMLButtonElement>('.list-dialog-btn-confirm')!
@@ -117,7 +126,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
 
       const pluginListDom = view.querySelector('#plugin-list')!
 
-      const getList1 = (noCache = false) => {
+      const getList1 = (noCache = false) =>
         getList(noCache).then(async list => {
           pluginList = list
           for (let i = 0; i < list.length; i++) {
@@ -131,7 +140,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
             updateElProp(dom, manifest, plugin.repo)
           }
         })
-      }
+
       refreshBtn.addEventListener('click', () => {
         pluginListDom.replaceChildren()
         getList1(true)
@@ -154,6 +163,9 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     uninstallBtnEl?: HTMLButtonElement
     detailBtnEl?: HTMLButtonElement
     retryBtnEl?: HTMLButtonElement
+    typeEl?: HTMLSpanElement
+    dependenciesItemsEl?: HTMLSpanElement
+    platformsEl?: HTMLSpanElement
     manifest: Manifest | null = null
 
     #initPromise: Promise<void>
@@ -177,6 +189,9 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
       this.authorsEl = this.shadowRoot!.querySelector('.authors')!
       this.manipulateEl = this.shadowRoot!.querySelector('.manipulate')!
       this.iconEl = this.shadowRoot!.querySelector('.icon')!
+      this.typeEl = this.shadowRoot!.querySelector('.type')!
+      this.dependenciesItemsEl = this.shadowRoot!.querySelector('.dependencies>.items')!
+      this.platformsEl = this.shadowRoot!.querySelector('.platforms')!
 
       this.updateBtnEl = this.shadowRoot!.querySelector('.update')!
       const installEvent = async (update = false) => {
@@ -224,7 +239,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
       this.installBtnEl.addEventListener('click', () => installEvent())
       this.uninstallBtnEl = this.shadowRoot!.querySelector('.uninstall')!
       this.uninstallBtnEl.addEventListener('click', async () => {
-        console.log('uninstall')
+        console.log('uninstall', this.manifest!.name)
         currentItem = pluginList[Number(this.dataset.index)]
         currentManifest = this.manifest!
         showDialog({ title: '卸载', message: `确定要卸载插件 ${this.manifest!.name} 吗？`, type: 'confirm' }).then(e => {
@@ -271,7 +286,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     }
 
     static get observedAttributes() {
-      return ['data-name', 'data-version', 'data-description', 'data-authors', 'data-icon', 'data-failed']
+      return ['data-name', 'data-version', 'data-description', 'data-authors', 'data-icon', 'data-failed', 'data-type', 'data-dependencies', 'data-platforms']
     }
 
     attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null) {
@@ -300,7 +315,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
               this.descriptionEl!.title = newValue || ''
               break
             case 'data-authors': {
-              const arr: Array<{ name: string; link: string }> = JSON.parse(newValue === 'undefined' ? '' : newValue || '[]')
+              const arr: Array<{ name: string; link: string }> = newValue === '1' ? this.manifest!.authors! : []
 
               this.authorsEl!.append(
                 ...arr
@@ -315,7 +330,43 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                     p[i * 2] = v
                     if (i) p[i * 2 - 1] = ' | '
                     return p
-                  }, <any>[])
+                  }, [] as Array<string | Element>)
+              )
+              break
+            }
+            case 'data-type':
+              this.typeEl!.innerText = typeMap[newValue + ''] || 'unknown'
+              break
+            case 'data-platforms':
+              this.platformsEl!.title = this.platformsEl!.innerText = newValue || ''
+              break
+            case 'data-dependencies': {
+              const arr: string[] = newValue === '1' ? this.manifest!.dependencies! : []
+
+              this.dependenciesItemsEl!.append(
+                ...arr
+                  .map(e => {
+                    const a = document.createElement('a')
+                    a.title = e
+                    a.innerText = e
+                    a.onclick = () => {
+                      const item = document.getElementById(`item-${e}`)
+                      if (item) {
+                        item.scrollIntoView?.()
+                        item.classList.add('highlight-item')
+
+                        setTimeout(() => {
+                          item.classList.remove('highlight-item')
+                        }, 2e3)
+                      }
+                    }
+                    return a
+                  })
+                  .reduce((p, v, i) => {
+                    p[i * 2] = v
+                    if (i) p[i * 2 - 1] = ' | '
+                    return p
+                  }, [] as Array<string | Element>)
               )
               break
             }
@@ -349,11 +400,14 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
         this.titleEl!.style.cursor = 'pointer'
       }
     }
+
+    /**
+     * 过滤用，判断是否应该隐藏
+     */
     updateHidden() {
       try {
-        const authors: Array<{ name: string; link: string }> = JSON.parse(this.dataset.authors === 'undefined' ? '' : this.dataset.authors || '[]')
+        const authors: Array<{ name: string; link: string }> = this.dataset.authors === '1' ? this.manifest!.authors : []
         const str = (this.dataset.name || '') + (this.dataset.version || '') + (this.dataset.description || '') + (this.dataset.version || '') + authors.map(e => e.name).join('')
-        config.debug && console.log('hidden', str)
         if (!filterInput.value || str.toLowerCase().includes(filterInput.value.toLowerCase())) {
           this.hidden = false
         } else {
@@ -370,15 +424,20 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
 
 function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: string) {
   if (manifest) {
+    el.id = `item-${manifest.slug}`
     el.dataset.name = manifest.name
     el.manifest = manifest
     el.updateOpenDirEvent()
     el.dataset.description = manifest.description
-    el.dataset.authors = JSON.stringify(manifest.authors)
+    el.dataset.lower4 = Number(manifest.manifest_version) >= 4 ? '' : '1'
+    el.dataset.authors = manifest.authors ? '1' : ''
+    el.dataset.platforms = manifest.platform.join('|')
     el.dataset.installed = LiteLoader.plugins[manifest.slug] ? '1' : ''
     el.dataset.slug = manifest.slug
     el.dataset.icon = getIconUrls(pluginList[Number(el.dataset.index)], manifest).toString()
     el.dataset.defaultIcon = defaultIcon
+    el.dataset.type = manifest.type
+    el.dataset.dependencies = manifest.dependencies ? '1' : ''
     delete el.dataset.failed
     if (LiteLoader.plugins[manifest.slug]) {
       el.dataset.version = LiteLoader.plugins[manifest.slug].manifest.version
@@ -425,13 +484,55 @@ async function getManifest(item: Plugin, noCache = false): Promise<Manifest | nu
   try {
     return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
       cache: noCache ? 'no-cache' : 'default'
-    }).then(res => (res.status === 200 ? res.json() : null))
+    }).then(res => {
+      if (res.status === 200) {
+        return res.json()
+      } else if (res.status === 404) {
+        return fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/package.json`), {
+          cache: noCache ? 'no-cache' : 'default'
+        }).then(async res1 => {
+          if (res1.status === 200) {
+            const pkg = await res1.json()
+            const obj = pkg.liteloader_manifest
+            if (obj) {
+              obj.version = pkg.version
+              obj.description = pkg.description
+              obj.authors = typeof pkg.author === 'string' ? [{ name: pkg.author, link: `https://github.com/${pkg.author}` }] : [pkg.author]
+              return obj
+            }
+          }
+          return null
+        })
+      }
+      return null
+    })
   } catch (err) {
     console.warn(`getManifest jsdelivr ${url}`, err)
-    return await fetchWithTimeout((url = `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
+    const mirror = getGithubMirrors()
+    return await fetchWithTimeout((url = `${mirror}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
       cache: noCache ? 'no-cache' : 'default'
     })
-      .then(res => (res.status === 200 ? res.json() : null))
+      .then(res => {
+        if (res.status === 200) {
+          return res.json()
+        } else {
+          return fetchWithTimeout((url = `${mirror}https://raw.githubusercontent.com/${item.repo}/${item.branch}/package.json`), {
+            cache: noCache ? 'no-cache' : 'default'
+          }).then(async res1 => {
+            if (res1.status === 200) {
+              const pkg = await res1.json()
+              const obj = pkg.liteloader_manifest
+              if (obj) {
+                obj.version = pkg.version
+                obj.description = pkg.description
+                obj.authors = typeof pkg.author === 'string' ? [{ name: pkg.author, link: `https://github.com/${pkg.author}` }] : [pkg.author]
+                return obj
+              }
+            }
+            return null
+          })
+        }
+      })
       .catch(err => {
         console.log(`getManifest ${url}`, err)
         return null

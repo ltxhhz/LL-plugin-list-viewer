@@ -16,6 +16,23 @@
     background-size: 100%;
   }
 
+  :host(.highlight-item) .plugin-item-info {
+    animation: highlightAnimation 2s ease-out 1;
+  }
+
+  /* 动画关键帧 */
+  @keyframes highlightAnimation {
+    0% {
+      background-color: orange;
+      box-shadow: 0 0 10px 10px orange;
+    }
+
+    100% {
+      background-color: transparent;
+      box-shadow: 0 0 1px 1px transparent;
+    }
+  }
+
   .authors {
     display: inline-flex;
     gap: 10px;
@@ -33,11 +50,18 @@
     gap: 10px;
   }
 
+  .dependencies a {
+    color: green;
+    cursor: pointer;
+  }
+
   .failed,
   .uninstall,
   .update,
   .inactive-tag,
-  .newer-version {
+  .newer-version,
+  .dependencies,
+  .lower4 {
     display: none;
   }
 
@@ -70,15 +94,26 @@
   :host([data-inactive='1']) .inactive-tag {
     display: inline;
   }
+
+  :host([data-dependencies='1']) .dependencies {
+    display: inline;
+  }
+
+  :host([data-lower4='1']) .lower4 {
+    display: inline;
+    color: yellow;
+    padding-left: 5px;
+  }
 </style>
 <setting-item data-direction="row">
-  <div>
+  <div class="plugin-item-info">
     <div style="display: flex; gap: 10px; margin-bottom: 10px">
       <img class="icon" src="local://root/src/setting/static/default.png" />
       <div>
         <setting-text>
           <span class="title" title="插件名">插件名</span>
-          <span class="inactive-tag">（未激活）</span>
+          <span class="inactive-tag">(未激活)</span>
+          <span class="lower4" title="manifest版本小于4">(&lt;4)</span>
         </setting-text>
         <setting-text data-type="secondary">
           <span class="description" title="插件描述">插件描述</span>
@@ -86,9 +121,14 @@
       </div>
     </div>
     <setting-text data-type="secondary">
-      <span style="margin-right: 50px;">版本：<span class="version">版本</span><span class="newer-version"></span>
-      </span>
-      <span>开发：<span class="authors"></span></span>
+      <div style="display: flex;gap: 30px;flex-wrap: wrap;">
+        <span>版本：<span class="version">版本</span><span class="newer-version"></span>
+        </span>
+        <span>开发：<span class="authors"></span></span>
+        <span>类型：<span class="type"></span></span>
+        <span>平台：<span class="platforms"></span></span>
+        <span class="dependencies">依赖：<span class="items"></span></span>
+      </div>
     </setting-text>
   </div>
   <div class="manipulate">
