@@ -101,7 +101,7 @@ export const download_url_us = [
   ]
 
 export function localFetch(path: string, plugin = 'list-viewer') {
-  return fetch(`local:///${LiteLoader.path.plugins.replaceAll('\\', '/')}/${plugin}/${path.startsWith('/') ? path.slice(1) : path}`)
+  return fetch(`local:///${LiteLoader.plugins[plugin].path.plugin.replace(':\\', '://').replaceAll('\\', '/')}/${path.startsWith('/') ? path.slice(1) : path}`)
 }
 
 export function fetchWithTimeout(url: string | URL | Request, options?: RequestInit, timeout = 3e3): Promise<Response> {

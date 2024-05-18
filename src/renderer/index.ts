@@ -6,7 +6,7 @@ import { fetchWithTimeout, localFetch } from './utils'
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
   branch: 'v4',
-  file: 'plugins.json',
+  file: 'plugins.json'
 }
 
 const defaultIcon = 'local://root/src/setting/static/default.png'
@@ -42,7 +42,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
   ;(
     LiteLoader.api.config.get(thisSlug, {
       inactivePlugins: [],
-      debug: false,
+      debug: false
     }) as PromiseLike<Config>
   ).then(e => (config = e))
 
@@ -193,13 +193,6 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
             }
             install(res)
               .then(res => {
-                if (update) {
-                  this.updateBtnEl!.removeAttribute('is-disabled')
-                  this.updateBtnEl!.innerText = '更新'
-                } else {
-                  this.installBtnEl!.removeAttribute('is-disabled')
-                  this.installBtnEl!.innerText = '安装'
-                }
                 if (res.success) {
                   this.dataset.installed = '1'
                   this.dataset.inactive = '1'
@@ -213,6 +206,15 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
               })
               .catch(e => {
                 showDialog({ title: '安装失败', message: e.message, type: 'message' })
+              })
+              .finally(() => {
+                if (update) {
+                  this.updateBtnEl!.removeAttribute('is-disabled')
+                  this.updateBtnEl!.innerText = '更新'
+                } else {
+                  this.installBtnEl!.removeAttribute('is-disabled')
+                  this.installBtnEl!.innerText = '安装'
+                }
               })
           }
         })
@@ -403,12 +405,12 @@ async function getList(noCache = false): Promise<PluginList> {
   let url
   try {
     return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${listUrl.repo}@${listUrl.branch.replace(/^v(?!v)/, 'vv')}/${listUrl.file}`), {
-      cache: noCache ? 'no-cache' : 'default',
+      cache: noCache ? 'no-cache' : 'default'
     }).then(res => (res.status === 200 ? res.json() : null))
   } catch (err) {
     console.warn(`getList jsdelivr ${url}`, err)
     return await fetchWithTimeout(`${getGithubMirrors()}https://raw.githubusercontent.com/${listUrl.repo}/${listUrl.branch}/${listUrl.file}`, {
-      cache: noCache ? 'no-cache' : 'default',
+      cache: noCache ? 'no-cache' : 'default'
     })
       .then(res => (res.status === 200 ? res.json() : null))
       .catch(err => {
@@ -422,12 +424,12 @@ async function getManifest(item: Plugin, noCache = false): Promise<Manifest | nu
   let url
   try {
     return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
-      cache: noCache ? 'no-cache' : 'default',
+      cache: noCache ? 'no-cache' : 'default'
     }).then(res => (res.status === 200 ? res.json() : null))
   } catch (err) {
     console.warn(`getManifest jsdelivr ${url}`, err)
     return await fetchWithTimeout((url = `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
-      cache: noCache ? 'no-cache' : 'default',
+      cache: noCache ? 'no-cache' : 'default'
     })
       .then(res => (res.status === 200 ? res.json() : null))
       .catch(err => {
@@ -444,7 +446,7 @@ async function install(release = false): Promise<HandleResult> {
     if (!url) {
       return Promise.resolve({
         success: false,
-        message: '获取release包失败',
+        message: '获取release包失败'
       })
     }
   } else {
@@ -457,7 +459,7 @@ function getIconUrls(item: Plugin, manifest: Manifest): [string?, string?] {
   if (manifest.icon) {
     return [
       `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/${manifest.icon.replace(/^\.?\//, '')}`,
-      `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/${manifest.icon.replace(/^\.?\//, '')}`,
+      `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/${manifest.icon.replace(/^\.?\//, '')}`
     ]
   }
   return []
