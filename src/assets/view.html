@@ -6,14 +6,22 @@
   [class^=list-dialog] button {
     cursor: pointer;
   }
+
+  button {
+    user-select: none;
+  }
 </style>
 <setting-panel>
   <setting-list data-direction="column">
     <setting-item>
-      <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号" style="height: 25px; width: 100%; color: inherit" />
+      <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号"
+        style="height: 25px; width: 100%; color: inherit" />
     </setting-item>
     <setting-item data-direction="row">
       <setting-button data-type="primary" class="refresh-btn">刷新</setting-button>
+      <setting-text>
+        <span>插件总数：<span class="total-text"></span></span>
+      </setting-text>
     </setting-item>
     <setting-item data-direction="row">
       <div>刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新</div>
@@ -57,7 +65,7 @@
     <div>content</div>
   </div>
   <hr />
-  <div style="display: flex; justify-content: flex-end; gap: 20px">
+  <div style="display: flex; justify-content: flex-end; gap: 20px;">
     <button class="list-dialog-btn-confirm">确认</button>
     <button class="list-dialog-btn-cancel">取消</button>
   </div>

@@ -8,8 +8,12 @@ import https from 'https'
 
 const thisSlug = 'list-viewer'
 
-const listen = <K extends keyof GlobalMethods['ListViewer']>(channel: K, cb: (e: IpcMainEvent, ...args: Parameters<GlobalMethods['ListViewer'][K]>) => void) => ipcMain.on('LiteLoader.ListViewer.' + channel, cb)
-const handle = <K extends keyof GlobalMethods['ListViewer']>(channel: K, cb: (e: IpcMainInvokeEvent, ...args: Parameters<GlobalMethods['ListViewer'][K]>) => ReturnType<GlobalMethods['ListViewer'][K]>) => ipcMain.handle('LiteLoader.ListViewer.' + channel, cb)
+const listen = <K extends keyof GlobalMethods['ListViewer']>(channel: K, cb: (e: IpcMainEvent, ...args: Parameters<GlobalMethods['ListViewer'][K]>) => void) =>
+  ipcMain.on('LiteLoader.ListViewer.' + channel, cb)
+const handle = <K extends keyof GlobalMethods['ListViewer']>(
+  channel: K,
+  cb: (e: IpcMainInvokeEvent, ...args: Parameters<GlobalMethods['ListViewer'][K]>) => ReturnType<GlobalMethods['ListViewer'][K]>
+) => ipcMain.handle('LiteLoader.ListViewer.' + channel, cb)
 
 // export const onBrowserWindowCreated = (window: BrowserWindow) => {
 //   console.log('A window has just been created')
@@ -22,27 +26,31 @@ listen('log', (_, args) => {
 
 handle('getPkg', async (_, slug, url) => {
   output('安装', slug, url)
-  return await request(url).then(res => {
-    output('下载完成', slug)
-    const zip = path.join(LiteLoader.plugins[thisSlug].path.data, `${slug}.zip`)
-    fs.writeFileSync(zip, res.data)
-    output('写入', zip)
-    return installPlugin(zip, slug)
-  })
+  return await request(url)
+    .then(res => {
+      output('下载完成', slug)
+      const zip = path.join(LiteLoader.plugins[thisSlug].path.data, `${slug}.zip`)
+      fs.writeFileSync(zip, res.data)
+      output('写入', zip)
+      return installPlugin(zip, slug)
+    })
+    .catch(err => {
+      throw new Error(`${err.message} \n${url}`)
+    })
 })
 
 handle('removePkg', async (_e, slug, removeData = false): Promise<HandleResult> => {
   output('卸载', slug)
   let plugin, data
   if (LiteLoader.plugins[slug]) {
-    ({ plugin, data } = LiteLoader.plugins[slug].path)
+    ;({ plugin, data } = LiteLoader.plugins[slug].path)
   } else {
     output('未激活的插件，寻找路径', slug)
     plugin = findPluginPath(slug)
     if (!plugin) {
       return {
         success: false,
-        message: '未找到插件路径',
+        message: '未找到插件路径'
       }
     }
     output('寻找到的路径', plugin)
@@ -54,12 +62,12 @@ handle('removePkg', async (_e, slug, removeData = false): Promise<HandleResult> 
     fs.rmdirSync(plugin, { recursive: true })
     output('卸载完成', slug)
     return {
-      success: true,
+      success: true
     }
   } catch (error: any) {
     return {
       success: false,
-      message: error.message,
+      message: error.message
     }
   }
 })
@@ -89,7 +97,7 @@ function request(url: string): Promise<{
         resolve({
           data: data,
           str: data.toString('utf-8'),
-          url: res.url,
+          url: res.url
         })
       })
     })
@@ -135,7 +143,7 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
     fs.rmSync(cache_file_path, { force: true })
     output('删除完成', cache_file_path)
     return {
-      success: true,
+      success: true
     }
   } catch (error: any) {
     dialog.showErrorBox('插件列表查看', error.stack || error.message)
@@ -144,12 +152,12 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
     if (error.message.includes('Bad archive')) {
       return {
         success: false,
-        message: '安装包异常',
+        message: '安装包异常'
       }
     }
     return {
       success: false,
-      message: '安装失败 ' + error.message,
+      message: '安装失败 ' + error.message
     }
   }
 }

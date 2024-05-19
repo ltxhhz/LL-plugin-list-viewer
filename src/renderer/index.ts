@@ -57,6 +57,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
       const doms = domParser.parseFromString(res, 'text/html')
       filterInput = doms.querySelector<HTMLInputElement>('#list-search')!
       const refreshBtn = doms.querySelector<HTMLButtonElement>('.refresh-btn')!
+      const totalEl = doms.querySelector<HTMLSpanElement>('.total-text')!
       const dialogInstall = doms.querySelector<HTMLDialogElement>('.list-dialog-install')!
       const dialogInstallClose = doms.querySelector<HTMLButtonElement>('.list-dialog-install-btn-close')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
@@ -129,6 +130,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
       const getList1 = (noCache = false) =>
         getList(noCache).then(async list => {
           pluginList = list
+          totalEl.innerText = list.length.toString()
           for (let i = 0; i < list.length; i++) {
             const plugin = list[i]
             const dom = document.createElement('plugin-item') as PluginItemElement
@@ -480,6 +482,33 @@ async function getList(noCache = false): Promise<PluginList> {
 }
 
 async function getManifest(item: Plugin, noCache = false): Promise<Manifest | null> {
+  // if (item.repo === 'ltxhhz/LL-plugin-list-viewer') {
+  //   return Promise.resolve({
+  //     $schema: './manifest_schema.json',
+  //     manifest_version: 4,
+  //     type: 'extension',
+  //     name: '插件列表查看',
+  //     slug: 'list-viewer',
+  //     description: '插件列表查看·安装·更新',
+  //     version: '9.9.9',
+  //     authors: [
+  //       {
+  //         name: 'ltxhhz',
+  //         link: 'https://github.com/ltxhhz'
+  //       }
+  //     ],
+  //     platform: ['win32', 'linux', 'darwin'],
+  //     injects: {
+  //       main: './main/index.js',
+  //       preload: './preload/index.js',
+  //       renderer: './renderer/index.js'
+  //     },
+  //     repository: {
+  //       repo: 'ltxhhz/LL-plugin-list-viewer',
+  //       branch: 'master'
+  //     }
+  //   } as any)
+  // }
   let url
   try {
     return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
@@ -542,6 +571,8 @@ async function getManifest(item: Plugin, noCache = false): Promise<Manifest | nu
 
 async function install(release = false): Promise<HandleResult> {
   let url
+  console.log('install', currentItem)
+
   if (release) {
     url = await getLatestReleaseUrl(currentItem)
     if (!url) {
@@ -553,6 +584,7 @@ async function install(release = false): Promise<HandleResult> {
   } else {
     url = getArchiveUrl(currentItem)
   }
+  // throw new Error('not implemented')
   return ListViewer.getPkg(currentManifest.slug, getGithubMirrors() + url)
 }
 
@@ -582,7 +614,12 @@ function getArchiveUrl(item: Plugin) {
 }
 
 async function getLatestReleaseUrl(item: Plugin) {
-  const body = await fetchWithTimeout(`https://api.github.com/repos/${item.repo}/releases/latest`).then(e => e.json())
+  const url = `https://api.github.com/repos/${item.repo}/releases/latest`
+  const body = await fetchWithTimeout(url)
+    .then(e => e.json())
+    .catch(err => {
+      throw new Error(`${err.message} \n${url}`)
+    })
   const zipFile = body.assets.find(asset => asset.name.endsWith('.zip'))
   return zipFile.browser_download_url
 }
