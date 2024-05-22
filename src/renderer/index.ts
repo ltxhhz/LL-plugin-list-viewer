@@ -2,7 +2,7 @@ import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
 
-import { config, fetchWithTimeout, getDynamicMirror, getRandomItem, localFetch, originMirrors, initConfig, useDownloadMirror, useRawMirror, thisSlug } from './utils'
+import { config, fetchWithTimeout, getDynamicMirror, getRandomItem, localFetch, originMirrors, initConfig, useDownloadMirror, useRawMirror } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
@@ -130,7 +130,6 @@ export function onSettingWindowCreated(view: HTMLElement) {
         const isActive = mirrorSwitch.hasAttribute('is-active')
         mirrorSwitch.toggleAttribute('is-active', !isActive)
         config.useMirror = !isActive
-        LiteLoader.api.config.set(thisSlug, config)
       }
 
       doms.body.childNodes.forEach(dom => {
@@ -239,7 +238,6 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                   this.dataset.inactive = '1'
                   if (update) delete this.dataset.update
                   config.inactivePlugins.push(this.manifest!.slug)
-                  LiteLoader.api.config.set(thisSlug, config)
                   this.updateOpenDirEvent()
                 } else {
                   showDialog({ title: '安装失败', message: res.message, type: 'message' })
@@ -280,7 +278,6 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                 if (config.inactivePlugins.includes(this.manifest!.slug)) {
                   this.dataset.inactive = '0'
                   config.inactivePlugins = config.inactivePlugins.filter(e => e !== this.manifest!.slug)
-                  LiteLoader.api.config.set(thisSlug, config)
                 }
                 this.updateOpenDirEvent()
               } else {
@@ -492,7 +489,6 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
         el.dataset.inactive = '1'
       } else {
         config.inactivePlugins = config.inactivePlugins.filter(v => v !== manifest.slug)
-        LiteLoader.api.config.set(thisSlug, config)
       }
     }
   } else {

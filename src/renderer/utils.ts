@@ -24,6 +24,16 @@ export async function initConfig() {
     useMirror: true
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
+  const save = debounce((obj: Config) => {
+    LiteLoader.api.config.set(thisSlug, obj)
+  }, 1e3)
+  config = new Proxy(config, {
+    set(target, key, value) {
+      target[key] = value
+      save(target)
+      return true
+    }
+  })
 }
 export function getDynamicMirror() {
   const m = getRandomItem(originMirrors)
@@ -123,4 +133,16 @@ export function fetchWithTimeout(url: string | URL | Request, options?: RequestI
         reject(error)
       })
   })
+}
+
+export function debounce(func: (...args: any[]) => any, delay: number) {
+  let timeoutId: any
+  return function (...args: any[]) {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+    timeoutId = setTimeout(() => {
+      func(args)
+    }, delay)
+  }
 }
