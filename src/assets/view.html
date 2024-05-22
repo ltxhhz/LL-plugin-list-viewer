@@ -10,24 +10,52 @@
   button {
     user-select: none;
   }
+
+  .mirror-select {
+    user-select: none;
+  }
 </style>
-<setting-panel>
-  <setting-list data-direction="column">
-    <setting-item>
-      <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号"
-        style="height: 25px; width: 100%; color: inherit" />
-    </setting-item>
-    <setting-item data-direction="row">
-      <setting-button data-type="primary" class="refresh-btn">刷新</setting-button>
-      <setting-text>
-        <span>插件总数：<span class="total-text"></span></span>
-      </setting-text>
-    </setting-item>
-    <setting-item data-direction="row">
-      <div>刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新</div>
-    </setting-item>
-  </setting-list>
-</setting-panel>
+<setting-section>
+  <setting-panel>
+    <setting-list data-direction="column">
+      <setting-item>
+        <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号"
+          style="height: 25px; width: 100%; color: inherit" />
+      </setting-item>
+      <setting-item data-direction="row">
+        <div>
+          <setting-text>
+            <span>插件总数：<span class="total-text"></span></span>
+          </setting-text>
+          <setting-text data-type="secondary">
+            刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新
+          </setting-text>
+        </div>
+        <div>
+          <setting-button data-type="primary" class="refresh-btn">刷新</setting-button>
+        </div>
+      </setting-item>
+      <setting-item data-direction="row">
+        <div>
+          <setting-text>是否使用镜像</setting-text>
+          <setting-text data-type="secondary">设置系统代理时建议关闭</setting-text>
+        </div>
+        <div>
+        <!-- <div>
+          不使用带缓存的镜像
+          <setting-switch class="mirror-no-cache"></setting-switch>
+        </div> -->
+          <setting-switch class="mirror-switch" is-active></setting-switch>
+          <!-- <setting-select class="mirror-select" style="width: 150px;">
+            <setting-option data-value="1" is-selected>不使用镜像</setting-option>
+            <setting-option data-value="2">2</setting-option>
+            <setting-option data-value="3">3</setting-option>
+          </setting-select> -->
+        </div>
+      </setting-item>
+    </setting-list>
+  </setting-panel>
+</setting-section>
 
 <setting-section data-title="插件列表">
   <setting-panel>

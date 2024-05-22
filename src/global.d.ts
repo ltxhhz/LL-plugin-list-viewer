@@ -94,6 +94,10 @@ declare global {
 
   declare const ListViewer: GlobalMethods['ListViewer']
 
+  const SettingElementStyleSheets: {
+    styleSheets: CSSStyleSheet
+    on: (css: CSSStyleSheet) => void
+  }
   interface Manifest {
     manifest_version?: number
     /** 插件类型 */

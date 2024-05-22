@@ -1,7 +1,8 @@
 import { compare } from 'compare-versions'
+import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
 
-import { fetchWithTimeout, localFetch } from './utils'
+import { config, fetchWithTimeout, getDynamicMirror, getRandomItem, localFetch, originMirrors, initConfig, useDownloadMirror, useRawMirror, thisSlug } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
@@ -12,7 +13,6 @@ const listUrl = {
 const defaultIcon = 'local://root/src/setting/static/default.png'
 
 const domParser = new DOMParser()
-const thisSlug = 'list-viewer'
 interface DialogOptions {
   title: string
   message?: string
@@ -24,18 +24,11 @@ interface DialogOptions {
 
 type PluginItemElement = ReturnType<typeof createItemComponent>
 
-interface Config {
-  debug: boolean
-  inactivePlugins: string[]
-}
-
 const typeMap = {
   extension: '扩展',
   theme: '主题',
   framework: '框架'
 }
-
-let config: Config
 
 let pluginList: PluginList
 let currentItem: Plugin
@@ -44,13 +37,30 @@ let showDialog: (option: DialogOptions) => Promise<boolean>
 let filterInput: HTMLInputElement
 
 export function onSettingWindowCreated(view: HTMLElement) {
-  ;(
-    LiteLoader.api.config.get(thisSlug, {
-      inactivePlugins: [],
-      debug: false
-    }) as PromiseLike<Config>
-  ).then(e => (config = e))
-
+  initConfig().then(async () => {
+    if (!config.mirrors) {
+      const res = await getDynamicMirror().catch(err => {
+        console.error('获取镜像地址失败', err)
+      })
+      if (res) {
+        config.mirrors = {
+          downloadUrl: res.download_url.concat(res.download_url_us),
+          rawUrl: res.raw_url
+        }
+      }
+    }
+  })
+  // const ss = SettingElementStyleSheets.styleSheets
+  // https://github.com/LiteLoaderQQNT/LiteLoaderQQNT/pull/293
+  // for (let i = 0; i < ss[0].cssRules.length; i++) {
+  //   const rule = ss[0].cssRules[i]
+  //   if (rule.start === ':host(setting-panel)') {
+  //     console.log(rule)
+  //     rule.cssRules[0].style.overflow = 'visible'
+  //     rule.cssRules[0].style.width = '100%'
+  //     rule.cssRules[0].style.display = 'inline-block'
+  //   }
+  // }
   localFetch('/assets/view.html')
     .then(e => e.text())
     .then(async res => {
@@ -60,6 +70,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
       const totalEl = doms.querySelector<HTMLSpanElement>('.total-text')!
       const dialogInstall = doms.querySelector<HTMLDialogElement>('.list-dialog-install')!
       const dialogInstallClose = doms.querySelector<HTMLButtonElement>('.list-dialog-install-btn-close')!
+      // const mirrorSelect = doms.querySelector<HTMLSelectElement>('.select-mirror')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
       dialogInstallClose.addEventListener('click', () => {
         dialogInstall.close()
@@ -113,6 +124,14 @@ export function onSettingWindowCreated(view: HTMLElement) {
           dialogResolve = resolve
         })
       }
+      const mirrorSwitch = doms.querySelector<HTMLInputElement>('.mirror-switch')!
+      mirrorSwitch.toggleAttribute('is-active', config.useMirror)
+      mirrorSwitch.onclick = () => {
+        const isActive = mirrorSwitch.hasAttribute('is-active')
+        mirrorSwitch.toggleAttribute('is-active', !isActive)
+        config.useMirror = !isActive
+        LiteLoader.api.config.set(thisSlug, config)
+      }
 
       doms.body.childNodes.forEach(dom => {
         view.appendChild(dom)
@@ -131,16 +150,21 @@ export function onSettingWindowCreated(view: HTMLElement) {
         getList(noCache).then(async list => {
           pluginList = list
           totalEl.innerText = list.length.toString()
-          for (let i = 0; i < list.length; i++) {
-            const plugin = list[i]
+          const promArr: Promise<void>[] = []
+          const limit = pLimit(3)
+          list.forEach((plugin, i) => {
             const dom = document.createElement('plugin-item') as PluginItemElement
             pluginListDom.appendChild(dom)
-            // await new Promise(resolve => setTimeout(resolve, 100))
-            const manifest = await getManifest(plugin, noCache)
-            dom.dataset.index = i + ''
-            config.debug && console.log(plugin, manifest)
-            updateElProp(dom, manifest, plugin.repo)
-          }
+            promArr.push(
+              limit(async () => {
+                const manifest = await getManifest(plugin, noCache)
+                dom.dataset.index = i + ''
+                config.debug && console.log(plugin, manifest)
+                updateElProp(dom, manifest, plugin.repo)
+              })
+            )
+          })
+          return Promise.all(promArr)
         })
 
       refreshBtn.addEventListener('click', () => {
@@ -241,7 +265,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
       this.installBtnEl.addEventListener('click', () => installEvent())
       this.uninstallBtnEl = this.shadowRoot!.querySelector('.uninstall')!
       this.uninstallBtnEl.addEventListener('click', async () => {
-        console.log('uninstall', this.manifest!.name)
+        config.debug && console.log('uninstall', this.manifest!.name)
         currentItem = pluginList[Number(this.dataset.index)]
         currentManifest = this.manifest!
         showDialog({ title: '卸载', message: `确定要卸载插件 ${this.manifest!.name} 吗？`, type: 'confirm' }).then(e => {
@@ -375,12 +399,26 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
             case 'data-icon': {
               const [src, src1] = (newValue || '').split(',')
               this.iconEl!.src = src || defaultIcon
+              let num = 0
               this.iconEl!.addEventListener('error', () => {
-                if (src1) {
-                  this.iconEl!.src = src1
+                if (src1 && num < 3) {
+                  //兼容打包方式（路径相对src，打包后才正常）
+                  const iconPath = this.manifest!.icon!.replace(/^\.?\//, '')
+                  switch (num) {
+                    case 0:
+                      this.iconEl!.src = src.replace(iconPath, `src/${iconPath}`)
+                      break
+                    case 1:
+                      this.iconEl!.src = src1
+                      break
+                    case 2:
+                      this.iconEl!.src = src1.replace(iconPath, `src/${iconPath}`)
+                      break
+                  }
                 } else {
                   this.iconEl!.src = defaultIcon
                 }
+                num++
               })
               break
             }
@@ -470,7 +508,7 @@ async function getList(noCache = false): Promise<PluginList> {
     }).then(res => (res.status === 200 ? res.json() : null))
   } catch (err) {
     console.warn(`getList jsdelivr ${url}`, err)
-    return await fetchWithTimeout(`${getGithubMirrors()}https://raw.githubusercontent.com/${listUrl.repo}/${listUrl.branch}/${listUrl.file}`, {
+    return await fetchWithTimeout(`${getGithubMirror()}https://raw.githubusercontent.com/${listUrl.repo}/${listUrl.branch}/${listUrl.file}`, {
       cache: noCache ? 'no-cache' : 'default'
     })
       .then(res => (res.status === 200 ? res.json() : null))
@@ -509,15 +547,28 @@ async function getManifest(item: Plugin, noCache = false): Promise<Manifest | nu
   //     }
   //   } as any)
   // }
-  let url
-  try {
-    return await fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/manifest.json`), {
-      cache: noCache ? 'no-cache' : 'default'
-    }).then(res => {
+  let url: any
+
+  let m = getGithubMirror()
+  if (config.useMirror) {
+    url = useRawMirror(`https://github.com/${item.repo}/raw/${item.branch}/manifest.json`, m || getRandomItem(originMirrors), !!m)
+  } else {
+    url = `https://github.com/${item.repo}/raw/${item.branch}/manifest.json`
+  }
+  return await fetchWithTimeout(url, {
+    cache: noCache ? 'no-cache' : 'default'
+  })
+    .then(res => {
       if (res.status === 200) {
         return res.json()
-      } else if (res.status === 404) {
-        return fetchWithTimeout((url = `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/package.json`), {
+      } else {
+        m = getGithubMirror()
+        if (config.useMirror) {
+          url = useRawMirror(`https://github.com/${item.repo}/raw/${item.branch}/package.json`, m || getRandomItem(originMirrors), !!m)
+        } else {
+          url = `https://github.com/${item.repo}/raw/${item.branch}/package.json`
+        }
+        return fetchWithTimeout(url, {
           cache: noCache ? 'no-cache' : 'default'
         }).then(async res1 => {
           if (res1.status === 200) {
@@ -533,45 +584,16 @@ async function getManifest(item: Plugin, noCache = false): Promise<Manifest | nu
           return null
         })
       }
+    })
+    .catch(err => {
+      config.debug && console.log(`getManifest ${url}`, err)
       return null
     })
-  } catch (err) {
-    console.warn(`getManifest jsdelivr ${url}`, err)
-    const mirror = getGithubMirrors()
-    return await fetchWithTimeout((url = `${mirror}https://raw.githubusercontent.com/${item.repo}/${item.branch}/manifest.json`), {
-      cache: noCache ? 'no-cache' : 'default'
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else {
-          return fetchWithTimeout((url = `${mirror}https://raw.githubusercontent.com/${item.repo}/${item.branch}/package.json`), {
-            cache: noCache ? 'no-cache' : 'default'
-          }).then(async res1 => {
-            if (res1.status === 200) {
-              const pkg = await res1.json()
-              const obj = pkg.liteloader_manifest
-              if (obj) {
-                obj.version = pkg.version
-                obj.description = pkg.description
-                obj.authors = typeof pkg.author === 'string' ? [{ name: pkg.author, link: `https://github.com/${pkg.author}` }] : [pkg.author]
-                return obj
-              }
-            }
-            return null
-          })
-        }
-      })
-      .catch(err => {
-        console.log(`getManifest ${url}`, err)
-        return null
-      })
-  }
 }
 
 async function install(release = false): Promise<HandleResult> {
-  let url
-  console.log('install', currentItem)
+  let url: string
+  config.debug && console.log('install', currentItem)
 
   if (release) {
     url = await getLatestReleaseUrl(currentItem)
@@ -585,15 +607,26 @@ async function install(release = false): Promise<HandleResult> {
     url = getArchiveUrl(currentItem)
   }
   // throw new Error('not implemented')
-  return ListViewer.getPkg(currentManifest.slug, getGithubMirrors() + url)
+  if (config.useMirror) {
+    const m = getGithubMirror()
+    return ListViewer.getPkg(currentManifest.slug, useDownloadMirror(url, m || getRandomItem(originMirrors), !!m))
+  } else {
+    return ListViewer.getPkg(currentManifest.slug, url)
+  }
 }
 
 function getIconUrls(item: Plugin, manifest: Manifest): [string?, string?] {
   if (manifest.icon) {
-    return [
-      `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/${manifest.icon.replace(/^\.?\//, '')}`,
-      `${getGithubMirrors()}https://raw.githubusercontent.com/${item.repo}/${item.branch}/${manifest.icon.replace(/^\.?\//, '')}`
-    ]
+    const iconPath = manifest.icon.replace(/^\.?\//, '')
+    const m = getGithubMirror()
+    if (config.useMirror) {
+      return [
+        `https://cdn.jsdelivr.net/gh/${item.repo}@${item.branch.replace(/^v(?!v)/, 'vv')}/${iconPath}`,
+        useDownloadMirror(`https://github.com/${item.repo}/raw/${item.branch}/${iconPath}`, m || getRandomItem(originMirrors), !!m)
+      ]
+    } else {
+      return [`https://github.com/${item.repo}/raw/${item.branch}/${iconPath}`]
+    }
   }
   return []
 }
@@ -602,11 +635,9 @@ function uninstall() {
   return ListViewer.removePkg(currentManifest.slug)
 }
 
-function getGithubMirrors() {
-  const urlsToTest = ['https://mirror.ghproxy.com/', 'https://ghproxy.net/', 'https://github.moeyy.xyz/']
+function getGithubMirror() {
   //https://cdn.jsdelivr.net/gh/[user/repo]@[branch]/[file]
-
-  return urlsToTest[Math.floor(Math.random() * urlsToTest.length)]
+  return getRandomItem(config.mirrors?.downloadUrl?.map?.(e => e[0]))
 }
 
 function getArchiveUrl(item: Plugin) {

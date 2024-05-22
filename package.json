@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "compare-versions": "^6.1.0",
-    "node-stream-zip": "^1.15.0"
+    "node-stream-zip": "^1.15.0",
+    "p-limit": "^5.0.0"
   }
 }
