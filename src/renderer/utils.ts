@@ -9,9 +9,9 @@ export const thisSlug = 'list-viewer'
 export interface Config {
   debug: boolean
   inactivePlugins: string[]
-  mirrors?: {
-    downloadUrl: string[][]
-    rawUrl: string[][]
+  mirrors: {
+    downloadUrl: string[]
+    // rawUrl: string[]
   }
   useMirror: boolean
 }
@@ -21,23 +21,23 @@ export async function initConfig() {
   const defaultConfig = {
     inactivePlugins: [],
     debug: false,
-    useMirror: true
+    useMirror: true,
+    mirrors: {
+      downloadUrl: ['https://cdn.jsdelivr.net/gh']
+      // rawUrl: []
+    }
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
     LiteLoader.api.config.set(thisSlug, obj)
   }, 1e3)
-  config = new Proxy(config, {
-    set(target, key, value) {
-      target[key] = value
-      save(target)
-      return true
-    }
+  config = deepWatch(config, () => {
+    save(config)
   })
 }
 export function getDynamicMirror() {
   const m = getRandomItem(originMirrors)
-  const url = useRawMirror(mirrorRepo, m, false)
+  const url = useMirror(mirrorRepo, m, false)
   return fetchWithTimeout(url)
     .then(e => {
       if (e.status === 200) {
@@ -87,18 +87,14 @@ export function getRandomItem<T>(arr: Array<T> | undefined): T | undefined {
   return arr ? arr[Math.floor(Math.random() * arr.length)] : undefined
 }
 
-export function useDownloadMirror(url: string, mirror: string, removeHost = true) {
-  return mirror + (removeHost ? url.replace(hostReg, '') : url)
-}
-
-export function useRawMirror(url: string, mirror: string, removeHost = true) {
+export function useMirror(url: string, mirror: string, removeHost = true) {
   if (/\/gh$/.test(mirror) && mirror.includes('jsdelivr')) {
     return (
       mirror +
       url
         .replace(hostReg, '')
         .replace('/raw/', '@')
-        .replace(/^v(?!v)/, 'vv')
+        .replace(/@v(?!v)/, '@vv')
     )
   } else {
     return mirror + (removeHost ? url.replace(hostReg, '') : url)
@@ -145,4 +141,24 @@ export function debounce(func: (...args: any[]) => any, delay: number) {
       func(args)
     }, delay)
   }
+}
+
+export function deepWatch<T extends object>(obj: T, callback: () => void):T {
+  const observer = new Proxy(obj, {
+    set(target, key, value, receiver) {
+      const oldValue = target[key]
+      if (oldValue !== value) {
+        // 如果值发生变化，调用回调函数
+        callback()
+        // 对象属性也是对象时，进行深度监听
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          deepWatch(value, callback)
+        }
+      }
+      // 设置新的值
+      return Reflect.set(target, key, value, receiver)
+    }
+  })
+
+  return observer
 }

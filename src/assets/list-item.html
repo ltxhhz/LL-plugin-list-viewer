@@ -1,6 +1,6 @@
 <style>
   img.icon {
-    max-width: 60px;
+    width: 60px;
     border-radius: 10px;
     position: relative;
   }
@@ -121,7 +121,7 @@
       </div>
     </div>
     <setting-text data-type="secondary">
-      <div style="display: flex;gap: 30px;flex-wrap: wrap;">
+      <div style="display: flex;gap: 5px 30px;flex-wrap: wrap;">
         <span>版本：<span class="version">版本</span><span class="newer-version"></span>
         </span>
         <span>开发：<span class="authors"></span></span>
@@ -132,10 +132,10 @@
     </setting-text>
   </div>
   <div class="manipulate">
-    <setting-button class="success update">更新</setting-button>
-    <setting-button class="success install">安装</setting-button>
+    <setting-button class="success update" data-type="primary">更新</setting-button>
+    <setting-button class="success install" data-type="primary">安装</setting-button>
     <setting-button class="success uninstall" data-type="secondary">卸载</setting-button>
-    <setting-button class="failed retry">重试</setting-button>
+    <setting-button class="failed retry" data-type="primary">重试</setting-button>
     <setting-button class="detail" data-type="secondary">详情</setting-button>
   </div>
 </setting-item>

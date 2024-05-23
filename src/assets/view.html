@@ -1,21 +1,59 @@
-<style>
-  [class^=list-dialog]::backdrop {
-    background: rgba(0, 0, 100, 0.4);
-  }
-
-  [class^=list-dialog] button {
-    cursor: pointer;
-  }
-
-  button {
-    user-select: none;
-  }
-
-  .mirror-select {
-    user-select: none;
-  }
-</style>
 <setting-section>
+  <style>
+    [class^=list-dialog]::backdrop {
+      background: rgba(0, 0, 100, 0.4);
+    }
+
+    [class^=list-dialog] button {
+      cursor: pointer;
+    }
+
+    button {
+      user-select: none;
+    }
+
+    .mirror-select {
+      user-select: none;
+    }
+
+    .manipulate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-dialog-install {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      border-radius: 5px;
+      width: 50%;
+      background-color: var(--bg_white);
+      color: var(--text_primary)
+    }
+
+    .list-dialog {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      border-radius: 5px;
+      width: 50%;
+      background-color: var(--bg_white);
+      color: var(--text_primary)
+    }
+
+    .list-dialog-content {
+      display: flex;
+      justify-content: space-around;
+      flex-direction: column;
+      white-space: pre-wrap;
+    }
+  </style>
   <setting-panel>
     <setting-list data-direction="column">
       <setting-item>
@@ -40,12 +78,13 @@
           <setting-text>是否使用镜像</setting-text>
           <setting-text data-type="secondary">设置系统代理时建议关闭</setting-text>
         </div>
-        <div>
-        <!-- <div>
+        <div class="manipulate">
+          <!-- <div>
           不使用带缓存的镜像
           <setting-switch class="mirror-no-cache"></setting-switch>
         </div> -->
           <setting-switch class="mirror-switch" is-active></setting-switch>
+          <setting-button class="mirror-add-btn" data-type="secondary">修改镜像</setting-button>
           <!-- <setting-select class="mirror-select" style="width: 150px;">
             <setting-option data-value="1" is-selected>不使用镜像</setting-option>
             <setting-option data-value="2">2</setting-option>
@@ -62,39 +101,36 @@
     <setting-list data-direction="column" id="plugin-list"> </setting-list>
   </setting-panel>
 </setting-section>
-<dialog
-  style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; border-radius: 5px; width: 50%"
-  class="list-dialog-install">
+<dialog class="list-dialog-install">
   <div style="font-size: large; display: flex; justify-content: space-between">
     选择包来源
-    <button class="list-dialog-install-btn-close" style="width: 25px">X</button>
+    <button class="list-dialog-install-btn-close q-button q-button--secondary default-btn"
+      style="width: 25px">×</button>
   </div>
   <hr />
-  <div style="color: red;margin-bottom: 10px;">注意：安装/更新 时会删除插件原文件，如果有修改过的文件，请先备份或者使用 git 进行安装/更新</div>
+  <div style="color: red;margin-bottom: 10px;">注意：安装/更新 时会删除插件原文件（不包括配置），如果有修改过的文件，请先备份或者使用 git 进行安装/更新</div>
   <div style="display: flex; justify-content: space-around">
     <div style="display: flex; flex-direction: column; gap: 10px">
-      <button class="list-dialog-btn-repo">使用仓库代码包</button>
+      <setting-button class="list-dialog-btn-repo" data-type="secondary">使用仓库代码包</button>
     </div>
     <div style="display: flex; flex-direction: column; gap: 10px">
-      <button class="list-dialog-btn-release">使用release包</button>
+      <setting-button class="list-dialog-btn-release" data-type="secondary">使用release包</button>
     </div>
   </div>
 </dialog>
 
-<dialog
-  style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; border-radius: 5px; width: 50%"
-  class="list-dialog">
+<dialog class="list-dialog">
   <div style="font-size: large; display: flex; justify-content: space-between">
     <span class="list-dialog-title">标题</span>
-    <button class="list-dialog-btn-close" style="width: 25px">X</button>
+    <button class="list-dialog-btn-close q-button q-button--secondary default-btn" style="width: 25px">×</button>
   </div>
   <hr />
-  <div style="display: flex; justify-content: space-around; flex-direction: column" class="list-dialog-content">
+  <div class="list-dialog-content">
     <div>content</div>
   </div>
   <hr />
   <div style="display: flex; justify-content: flex-end; gap: 20px;">
-    <button class="list-dialog-btn-confirm">确认</button>
-    <button class="list-dialog-btn-cancel">取消</button>
+    <setting-button class="list-dialog-btn-confirm" data-type="primary">确认</setting-button>
+    <setting-button class="list-dialog-btn-cancel" data-type="secondary">取消</setting-button>
   </div>
 </dialog>
