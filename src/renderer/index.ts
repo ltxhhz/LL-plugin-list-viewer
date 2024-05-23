@@ -188,26 +188,32 @@ jsdelivr镜像直接按默认那个写就行
 
       const pluginListDom = view.querySelector('#plugin-list')!
 
-      const getList1 = (noCache = false) =>
-        getList(noCache).then(async list => {
-          pluginList = list
-          totalEl.innerText = list.length.toString()
-          const promArr: Promise<void>[] = []
-          const limit = pLimit(3)
-          list.forEach((plugin, i) => {
-            const dom = document.createElement('plugin-item') as PluginItemElement
-            pluginListDom.appendChild(dom)
-            promArr.push(
-              limit(async () => {
-                const manifest = await getManifest(plugin, noCache)
-                dom.dataset.index = i + ''
-                config.debug && console.log(plugin, manifest)
-                updateElProp(dom, manifest, plugin.repo)
-              })
-            )
+      const getList1 = (noCache = false) => {
+        refreshBtn.setAttribute('is-disabled', '')
+        getList(noCache)
+          .then(async list => {
+            pluginList = list
+            totalEl.innerText = list.length.toString()
+            const promArr: Promise<void>[] = []
+            const limit = pLimit(3)
+            list.forEach((plugin, i) => {
+              const dom = document.createElement('plugin-item') as PluginItemElement
+              pluginListDom.appendChild(dom)
+              promArr.push(
+                limit(async () => {
+                  const manifest = await getManifest(plugin, noCache)
+                  dom.dataset.index = i + ''
+                  config.debug && console.log(plugin, manifest)
+                  updateElProp(dom, manifest, plugin.repo)
+                })
+              )
+            })
+            return Promise.all(promArr)
           })
-          return Promise.all(promArr)
-        })
+          .finally(() => {
+            refreshBtn.removeAttribute('is-disabled')
+          })
+      }
 
       refreshBtn.addEventListener('click', () => {
         pluginListDom.replaceChildren()
