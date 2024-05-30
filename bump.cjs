@@ -37,6 +37,7 @@ function updateVersionInFile(filePath, type) {
     }
 
     const incrementedVersion = incrementVersion(json.version, type);
+    const before = json.version;
     json.version = incrementedVersion;
 
     fs.writeFile(filePath, JSON.stringify(json, null, 2), 'utf8', err => {
@@ -44,7 +45,7 @@ function updateVersionInFile(filePath, type) {
         console.error(`Error writing to file: ${filePath}`);
         return;
       }
-      console.log(`Version updated successfully in ${filePath} to ${incrementedVersion}`);
+      console.log(`Version updated successfully in ${filePath} from ${before} to ${incrementedVersion}`);
     });
   });
 }

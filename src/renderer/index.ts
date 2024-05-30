@@ -126,7 +126,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
           dialogInput.placeholder = option.placeholder ?? '请输入内容'
           dialogInput.value = option.default ?? ''
           dialogInput.style.width = '100%'
-          dialogInput.style.background = 'var(--bg_top_light)'
+          dialogInput.style.background = 'var(--background_02)'
           dialogInput.style.color = 'var(--bg_white_light)'
           dialogInput.style.marginTop = '10px'
 
