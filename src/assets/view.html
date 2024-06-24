@@ -94,8 +94,8 @@
       </setting-item>
       <setting-item data-direction="row">
         <div>
-          <setting-text>列表排序方式</setting-text>
-          <setting-text data-type="secondary">选择排序方式的先后会影响排序结果</setting-text>
+          <setting-text>列表排序</setting-text>
+          <setting-text data-type="secondary">选择先后会影响排序</setting-text>
         </div>
         <div>
           <setting-select class="sort-select">
@@ -114,6 +114,45 @@
     <setting-list data-direction="column" id="plugin-list"> </setting-list>
   </setting-panel>
 </setting-section>
+
+<div>
+  <style>
+    .scroll-to-top-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--brand_standard);
+      /* 背景颜色 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      position: fixed;
+      right: -30px;
+      bottom: 110px;
+      border-color: var(--brand_standard);
+      transition: all 0.5s;
+      opacity: 0.3;
+    }
+
+    .scroll-to-top-btn:hover {
+      right: 10px;
+      opacity: 0.7;
+      background-color: var(--nt_brand_standard_2_overlay_hover_brand_2_mix);
+    }
+
+    .triangle-up {
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 15px solid var(--on_brand_primary);
+    }
+  </style>
+  <button class="scroll-to-top-btn">
+    <div class="triangle-up"></div>
+  </button>
+</div>
+
 <dialog class="list-dialog-install">
   <div style="font-size: large; display: flex; justify-content: space-between">
     选择包来源

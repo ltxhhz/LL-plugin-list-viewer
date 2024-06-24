@@ -68,6 +68,13 @@ export function onSettingWindowCreated(view: HTMLElement) {
       const totalEl = doms.querySelector<HTMLSpanElement>('.total-text')!
       const dialogInstall = doms.querySelector<HTMLDialogElement>('.list-dialog-install')!
       const dialogInstallClose = doms.querySelector<HTMLButtonElement>('.list-dialog-install-btn-close')!
+      const scrollToTopBtn = doms.querySelector<HTMLButtonElement>('.scroll-to-top-btn')!
+      scrollToTopBtn.addEventListener('click', () => {
+        view.parentElement!.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        })
+      })
       // const mirrorSelect = doms.querySelector<HTMLSelectElement>('.select-mirror')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
       dialogInstallClose.addEventListener('click', () => {
