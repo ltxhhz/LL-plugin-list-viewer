@@ -6,6 +6,8 @@ const hostReg = /^https?:\/\/[^/]+/
 export const originMirrors = ['https://mirror.ghproxy.com/', 'https://ghproxy.net/', 'https://github.moeyy.xyz/']
 export const thisSlug = 'list-viewer'
 
+export type SortType = 'default' | 'installed' | 'outdated'
+
 export interface Config {
   debug: boolean
   inactivePlugins: string[]
@@ -14,6 +16,7 @@ export interface Config {
     // rawUrl: string[]
   }
   useMirror: boolean
+  listSortType: SortType
 }
 export let config: Config
 
@@ -25,11 +28,14 @@ export async function initConfig() {
     mirrors: {
       downloadUrl: ['https://cdn.jsdelivr.net/gh']
       // rawUrl: []
-    }
+    },
+    listSortType: 'default'
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
-    LiteLoader.api.config.set(thisSlug, obj)
+    const objCloned = JSON.parse(JSON.stringify(obj))
+    config.debug && console.log('save obj', objCloned)
+    LiteLoader.api.config.set(thisSlug, objCloned)
   }, 1e3)
   config = deepWatch(config, () => {
     save(config)
@@ -138,12 +144,12 @@ export function debounce(func: (...args: any[]) => any, delay: number) {
       clearTimeout(timeoutId)
     }
     timeoutId = setTimeout(() => {
-      func(args)
+      func(...args)
     }, delay)
   }
 }
 
-export function deepWatch<T extends object>(obj: T, callback: () => void):T {
+export function deepWatch<T extends object>(obj: T, callback: () => void): T {
   const observer = new Proxy(obj, {
     set(target, key, value, receiver) {
       const oldValue = target[key]

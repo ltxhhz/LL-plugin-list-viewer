@@ -92,6 +92,19 @@
           </setting-select> -->
         </div>
       </setting-item>
+      <setting-item data-direction="row">
+        <div>
+          <setting-text>列表排序方式</setting-text>
+          <setting-text data-type="secondary">选择排序方式的先后会影响排序结果</setting-text>
+        </div>
+        <div>
+          <setting-select class="sort-select">
+            <setting-option data-value="default">默认排序</setting-option>
+            <setting-option data-value="installed">已安装</setting-option>
+            <setting-option data-value="outdated">需要更新</setting-option>
+          </setting-select>
+        </div>
+      </setting-item>
     </setting-list>
   </setting-panel>
 </setting-section>

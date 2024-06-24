@@ -2,7 +2,7 @@ import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
 
-import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror } from './utils'
+import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
@@ -30,6 +30,7 @@ type DialogOptions = {
       placeholder?: string
     }
 )
+let listLoadingPromise: Promise<void[]>
 
 type PluginItemElement = ReturnType<typeof createItemComponent>
 
@@ -175,6 +176,35 @@ jsdelivr镜像直接按默认那个写就行
         })
       }
 
+      const sortListFunc = (type: SortType) => {
+        listLoadingPromise.then(() => {
+          config.debug && console.log('开始排序', type)
+          switch (type) {
+            case 'default':
+              pluginListDom.replaceChildren(...Array.from<PluginItemElement>(pluginListDom.children as any).sort((a, b) => (Number(a.dataset.index) || 0) - (Number(b.dataset.index) || 0)))
+              break
+            case 'installed':
+              pluginListDom.replaceChildren(...Array.from<PluginItemElement>(pluginListDom.children as any).sort((a, b) => (Number(b.dataset.installed) || 0) - (Number(a.dataset.installed) || 0)))
+              break
+            case 'outdated':
+              pluginListDom.replaceChildren(...Array.from<PluginItemElement>(pluginListDom.children as any).sort((a, b) => (Number(b.dataset.update) || 0) - (Number(a.dataset.update) || 0)))
+              break
+            default:
+              break
+          }
+        })
+      }
+
+      const sortSelect = doms.querySelector<HTMLSelectElement>('.sort-select')!
+      doms.querySelector<HTMLDivElement>(`[data-value="${config.listSortType}"]`)?.setAttribute('is-selected', '')
+      sortSelect.addEventListener('selected', (e: any) => {
+        config.debug && console.log('列表排序方式改变', e.detail)
+        if (config.listSortType !== e.detail.value) {
+          sortListFunc(e.detail.value)
+        }
+        config.listSortType = e.detail.value
+      })
+
       doms.body.childNodes.forEach(dom => {
         view.appendChild(dom)
       })
@@ -190,7 +220,8 @@ jsdelivr镜像直接按默认那个写就行
 
       const getList1 = (noCache = false) => {
         refreshBtn.setAttribute('is-disabled', '')
-        getList(noCache)
+        sortSelect.setAttribute('is-disabled', '')
+        listLoadingPromise = getList(noCache)
           .then(async list => {
             pluginList = list
             totalEl.innerText = list.length.toString()
@@ -212,6 +243,7 @@ jsdelivr镜像直接按默认那个写就行
           })
           .finally(() => {
             refreshBtn.removeAttribute('is-disabled')
+            sortSelect.removeAttribute('is-disabled')
           })
       }
 
@@ -220,6 +252,7 @@ jsdelivr镜像直接按默认那个写就行
         getList1(true)
       })
       getList1()
+      sortListFunc(config.listSortType)
     })
     .catch(console.error)
 }
