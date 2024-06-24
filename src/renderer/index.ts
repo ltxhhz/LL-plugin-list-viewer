@@ -297,6 +297,8 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     }
 
     connectedCallback() {
+      config.debug && console.log('组件创建', this)
+      if (this.#initialized) return
       this.titleEl = this.shadowRoot!.querySelector('.title')!
       this.descriptionEl = this.shadowRoot!.querySelector('.description')!
       this.versionEl = this.shadowRoot!.querySelector('.version')!
@@ -402,6 +404,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     }
 
     attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null) {
+      config.debug && console.log('attributeChangedCallback', name, newValue)
       this.#initPromise.then(() => {
         try {
           switch (name) {
