@@ -115,7 +115,8 @@ export function localFetch(path: string, plugin = 'list-viewer') {
   return fetch(`local:///${LiteLoader.plugins[plugin].path.plugin.replace(':\\', '://').replaceAll('\\', '/')}/${path.startsWith('/') ? path.slice(1) : path}`)
 }
 
-export function fetchWithTimeout(url: string | URL | Request, options?: RequestInit, timeout = 3e3): Promise<Response> {
+export function fetchWithTimeout(url: string, options?: RequestInit, timeout = 3e3): Promise<Response> {
+  url = getRedirectedGitHubUrl(url) || url
   config.debug && console.log('fetchWithTimeout', url)
 
   return new Promise((resolve, reject) => {
@@ -167,4 +168,19 @@ export function deepWatch<T extends object>(obj: T, callback: () => void): T {
   })
 
   return observer
+}
+
+export function getRedirectedGitHubUrl(url: string) {
+  const regex = /https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)/
+  const match = url.match(regex)
+
+  if (match) {
+    const user = match[1]
+    const repo = match[2]
+    const branch = match[3]
+    const filePath = match[4]
+    return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filePath}`
+  } 
+  // throw new Error('Invalid GitHub URL')
+  return
 }
