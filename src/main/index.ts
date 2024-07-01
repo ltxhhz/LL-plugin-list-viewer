@@ -35,7 +35,11 @@ handle('getPkg', async (_, slug, url) => {
       return installPlugin(zip, slug)
     })
     .catch(err => {
-      throw new Error(`${err.message} \n${url}`)
+      // throw new Error(`${err.message} \n${url}`)
+      return {
+        success: false,
+        message: err.message
+      }
     })
 })
 
@@ -71,6 +75,10 @@ handle('removePkg', async (_e, slug, removeData = false): Promise<HandleResult> 
     }
   }
 })
+
+// handle('request',(_,url,timeout)=>{
+//   return request(url)
+// })
 
 function output(...args: any[]) {
   console.log('\x1b[32m[ListViewer]\x1b[0m', ...args)
@@ -148,7 +156,8 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
   } catch (error: any) {
     dialog.showErrorBox('插件列表查看', error.stack || error.message)
     // 安装失败删除文件
-    fs.rmSync(plugin_path, { recursive: true, force: true })
+    if (!LiteLoader.plugins[slug]) fs.rmSync(plugin_path, { recursive: true, force: true })
+    fs.rmSync(cache_file_path, { force: true })
     if (error.message.includes('Bad archive')) {
       return {
         success: false,

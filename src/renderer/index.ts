@@ -230,6 +230,14 @@ jsdelivr镜像直接按默认那个写就行
         sortSelect.setAttribute('is-disabled', '')
         listLoadingPromise = getList(noCache)
           .then(async list => {
+            if (typeof list === 'string') {
+              showDialog({
+                title: '获取列表失败',
+                type: 'message',
+                message: list,
+              })
+              return []
+            }
             pluginList = list
             totalEl.innerText = list.length.toString()
             const promArr: Promise<void>[] = []
@@ -588,8 +596,8 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
   }
 }
 
-async function getList(noCache = false, again = false): Promise<PluginList> {
-  let url
+async function getList(noCache = false, again = false): Promise<PluginList | string> {
+  let url = ''
   if (config.useMirror) {
     const m = getGithubMirror(!again)
     url = useMirror(`https://github.com/${listUrl.repo}/raw/${listUrl.branch}/${listUrl.file}`, m || getRandomItem(originMirrors), !!m)
@@ -603,7 +611,7 @@ async function getList(noCache = false, again = false): Promise<PluginList> {
     .catch(err => {
       if (again) {
         console.error(`getList ${url}`, err)
-        return null
+        return String(err)
       } else {
         console.warn(`getList ${url}`, err)
         return getList(noCache, true)
