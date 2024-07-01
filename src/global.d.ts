@@ -15,6 +15,7 @@ export interface GlobalMethods {
     log: (...args: any[]) => void
     getPkg: (slug: string, url: string) => Promise<HandleResult>
     removePkg: (slug: string, removeData?: boolean) => Promise<HandleResult>
+    // request: (url: string, timeout: number) => Promise<HandleResult>
   }
 }
 
