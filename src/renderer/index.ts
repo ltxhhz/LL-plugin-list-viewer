@@ -234,7 +234,7 @@ jsdelivr镜像直接按默认那个写就行
               showDialog({
                 title: '获取列表失败',
                 type: 'message',
-                message: list,
+                message: list
               })
               return []
             }
@@ -265,6 +265,7 @@ jsdelivr镜像直接按默认那个写就行
       refreshBtn.addEventListener('click', () => {
         pluginListDom.replaceChildren()
         getList1(true)
+        sortListFunc(config.listSortType)
       })
       getList1()
       sortListFunc(config.listSortType)
