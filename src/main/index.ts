@@ -122,16 +122,27 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
     }
     fs.mkdirSync(plugin_path, { recursive: true })
     output('开始解压', cache_file_path)
-    const zip = new StreamZip.async({ file: cache_file_path })
+    const zip = new StreamZip.async({ file: cache_file_path, skipEntryNameValidation: true })
     const entries = await zip.entries()
     const isFolder = !Object.hasOwn(entries, 'manifest.json') // 判断是否需要保留一级目录 true为不保留
     for (const entry of Object.values(entries)) {
+      if (isPathUnsafe(entry.name)) {
+        return {
+          success: false,
+          message: '压缩包中含有不安全路径'
+        }
+      }
       if (!entry.name.includes('.github')) {
         const pathname = `${plugin_path}/${isFolder ? entry.name.split('/').slice(1).join('/') : entry.name}`
         // 创建目录
         if (entry.isDirectory) {
           fs.mkdirSync(pathname, { recursive: true })
           continue
+        } else {
+          const pdir = path.dirname(pathname)
+          if (!fs.existsSync(pdir)) {
+            fs.mkdirSync(pdir, { recursive: true })
+          }
         }
         // 创建文件 有时不会先创建目录
         try {
@@ -187,4 +198,8 @@ function findPluginPath(slug: string) {
       }
       return false
     })
+}
+
+function isPathUnsafe(path) {
+  return /^(\/|\\|[a-zA-Z]:\\|[a-zA-Z]:\/|.*\.\..*)/.test(path)
 }
