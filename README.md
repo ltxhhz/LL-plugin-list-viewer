@@ -2,6 +2,8 @@
 
 > [!NOTE]
 > 该插件仅在 Windows 环境下测试开发，未对其他平台进行测试，不保证可用性
+>
+> 喜欢的话不要吝啬你 star~
 
 ## 功能
 
@@ -53,6 +55,7 @@ npm run build
 
 - 查询慢或者不稳，因为内置的几个镜像是随机使用，可以重新刷新或安装以使用另一个接口
 - ~~dialog 展示一次后列表顶部多出一部分空白，并且出现折叠图标，点击无效，同样是 LiteLoader 的组件，可能是 dialog 导致样式改变~~ [已修复#266](https://github.com/LiteLoaderQQNT/LiteLoaderQQNT/issues/266)
+- release 更新时需要调用 `api.github.com` ，但没有镜像可用，可能需要配合代理
 
 ## 鸣谢
 
