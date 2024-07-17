@@ -49,6 +49,13 @@ npm run build
 
 > 否则可以将 `dist` 目录移动到 `LiteLoaderQQNT数据目录/plugins/` 目录下
 
+
+
+## 插件开发者注意
+
+`manifest.json` 文件需要严格按照 [LiteLoader 的文档要求](https://liteloaderqqnt.github.io/docs/introduction.html#manifest-json)进行编写。
+> p.s.有一部分插件将字段 `authors:[{}]` 写成了 `author:{}`，这会导致插件开发者显示为空(LiteLoader 中也会)，这里不会做适配。
+
 ## 已知的问题
 
 > 暂时没有计划修复或无法修复

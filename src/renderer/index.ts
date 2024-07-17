@@ -48,17 +48,6 @@ let filterInput: HTMLInputElement
 
 export function onSettingWindowCreated(view: HTMLElement) {
   initConfig()
-  // const ss = SettingElementStyleSheets.styleSheets
-  // https://github.com/LiteLoaderQQNT/LiteLoaderQQNT/pull/293
-  // for (let i = 0; i < ss[0].cssRules.length; i++) {
-  //   const rule = ss[0].cssRules[i]
-  //   if (rule.start === ':host(setting-panel)') {
-  //     console.log(rule)
-  //     rule.cssRules[0].style.overflow = 'visible'
-  //     rule.cssRules[0].style.width = '100%'
-  //     rule.cssRules[0].style.display = 'inline-block'
-  //   }
-  // }
   localFetch('/assets/view.html')
     .then(e => e.text())
     .then(async res => {
@@ -244,6 +233,8 @@ jsdelivr镜像直接按默认那个写就行
             const limit = pLimit(3)
             list.forEach((plugin, i) => {
               const dom = document.createElement('plugin-item') as PluginItemElement
+              dom.dataset.name = plugin.repo
+              dom.dataset.description = plugin.branch
               pluginListDom.appendChild(dom)
               promArr.push(
                 limit(async () => {
@@ -569,13 +560,13 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
     el.dataset.description = manifest.description
     el.dataset.lower4 = Number(manifest.manifest_version) >= 4 ? '' : '1'
     el.dataset.authors = manifest.authors ? '1' : ''
-    el.dataset.platforms = manifest.platform.join('|')
+    el.dataset.platforms = manifest.platform.join(' | ')
     el.dataset.installed = LiteLoader.plugins[manifest.slug] ? '1' : ''
     el.dataset.slug = manifest.slug
     el.dataset.icon = getIconUrls(pluginList[Number(el.dataset.index)], manifest).toString()
     el.dataset.defaultIcon = defaultIcon
     el.dataset.type = manifest.type
-    el.dataset.dependencies = manifest.dependencies ? '1' : ''
+    el.dataset.dependencies = manifest.dependencies?.length ? '1' : ''
     delete el.dataset.failed
     if (LiteLoader.plugins[manifest.slug]) {
       el.dataset.version = LiteLoader.plugins[manifest.slug].manifest.version
