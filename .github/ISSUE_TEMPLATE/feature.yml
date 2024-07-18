@@ -1,0 +1,70 @@
+name: 需求建议
+description: 提出针对本项目的想法和建议
+title: '[feature]'
+labels:
+  - enhancement
+# assignees: ltxhhz
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **提交 issue 前请先搜索查看其他 issue，避免重复提交**
+  - type: markdown
+    attributes:
+      value: |
+        ## 环境信息
+        填写版本信息或者提供版本的截图
+        **不提供会被关闭**
+  - type: input
+    id: qq-version
+    # validations:
+    #   required: true
+    attributes:
+      label: qq版本
+      description: 在设置中LiteLoader分页里查看
+  - type: input
+    id: ll-version
+    # validations:
+    #   required: true
+    attributes:
+      label: LiteLoader 版本
+      description: 在设置中LiteLoader分页里查看
+  - type: textarea
+    id: versions
+    attributes:
+      label: 版本信息
+      description: 把设置中LiteLoader分页里最上方的版本信息截图粘贴到这里
+  - type: input
+    id: version
+    validations:
+      required: true
+    attributes:
+      label: list-viewer 插件版本
+      description: 在设置中LiteLoader分页里查看
+  - type: dropdown
+    id: LL-is-release
+    validations:
+      required: true
+    attributes:
+      label: LiteLoader 是否为发布版本(release)
+      options:
+        - 是
+        - 否
+  - type: markdown
+    attributes:
+      value: '## 详细信息'
+  - type: textarea
+    id: description
+    attributes:
+      label: 请描述您的需求或者改进建议
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: 请描述你建议的实现方案
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: 附加信息
+      description: 如果你还有其他需要提供的信息，可以在这里填写（截图、视频等）
