@@ -2,7 +2,7 @@ import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
 
-import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType } from './utils'
+import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType, thisSlug } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
@@ -64,6 +64,13 @@ export function onSettingWindowCreated(view: HTMLElement) {
           behavior: 'smooth'
         })
       })
+      const versionEl = doms.querySelector<HTMLSpanElement>('.version-text')!
+      const versionA = doms.createElement('a')
+      versionA.onclick = () => {
+        LiteLoader.api.openExternal('https://github.com/' + LiteLoader.plugins[thisSlug].manifest.repository.repo)
+      }
+      versionA.innerText = LiteLoader.plugins[thisSlug].manifest.version
+      versionEl.append(versionA)
       // const mirrorSelect = doms.querySelector<HTMLSelectElement>('.select-mirror')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
       dialogInstallClose.addEventListener('click', () => {

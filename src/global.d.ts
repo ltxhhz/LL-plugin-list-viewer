@@ -62,7 +62,7 @@ declare global {
     }
 
     interface ILiteLoaderPlugin {
-      manifest: any
+      manifest: Manifest
       incompatible: boolean
       disabled: boolean
       path: ILiteLoaderPluginPath

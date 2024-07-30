@@ -53,6 +53,11 @@
       flex-direction: column;
       white-space: pre-wrap;
     }
+
+    .version-text a {
+      color: #81adef;
+      cursor: pointer;
+    }
   </style>
   <setting-panel>
     <setting-list data-direction="column">
@@ -63,6 +68,7 @@
       <setting-item data-direction="row">
         <div>
           <setting-text>
+            <span style="margin-right: 10px;">插件版本：<span class="version-text"></span></span>
             <span>插件总数：<span class="total-text"></span></span>
           </setting-text>
           <setting-text data-type="secondary">
