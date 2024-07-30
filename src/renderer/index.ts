@@ -330,7 +330,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                   if (update) delete this.dataset.update
                   config.inactivePlugins.push(this.manifest!.slug)
                   this.updateOpenDirEvent()
-                } else {
+                } else if (res.message) {
                   showDialog({ title: '安装失败', message: res.message, type: 'message' })
                 }
               })
@@ -693,12 +693,32 @@ async function install(release = false): Promise<HandleResult> {
   config.debug && console.log('install', currentItem)
 
   if (release) {
-    url = await getLatestReleaseUrl(currentItem)
+    const urlObj = await getLatestReleaseUrl(currentItem)
+    if (urlObj.zip) {
+      url = urlObj.zip
+    } else {
+      const res = await showDialog({
+        title: '未发现zip资产包',
+        message: '是否使用源代码包安装？',
+        type: 'confirm'
+      })
+      if (res) {
+        url = urlObj.ball
+      } else {
+        url = ''
+      }
+    }
+    if (url === '') {
+      return {
+        success: false,
+        message: ''
+      }
+    }
     if (!url) {
-      return Promise.resolve({
+      return {
         success: false,
         message: '获取release包失败'
-      })
+      }
     }
   } else {
     url = getArchiveUrl(currentItem)
@@ -745,7 +765,7 @@ function getArchiveUrl(item: Plugin) {
   return `https://github.com/${item.repo}/archive/refs/heads/${item.branch}.zip`
 }
 
-async function getLatestReleaseUrl(item: Plugin) {
+async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefined; ball: string }> {
   const url = `https://api.github.com/repos/${item.repo}/releases/latest`
   const body = await fetchWithTimeout(url)
     .then(e => e.json())
@@ -753,5 +773,8 @@ async function getLatestReleaseUrl(item: Plugin) {
       throw new Error(`${err.message} \n${url}`)
     })
   const zipFile = body.assets.find(asset => asset.name.endsWith('.zip'))
-  return zipFile.browser_download_url
+  return {
+    zip: zipFile?.browser_download_url,
+    ball: `https://github.com/${item.repo}/archive/refs/tags/${body.tag_name}.zip` //body.zipball_url
+  }
 }
