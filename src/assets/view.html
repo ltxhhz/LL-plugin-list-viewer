@@ -58,12 +58,30 @@
       color: #81adef;
       cursor: pointer;
     }
+
+    .list-filter-type-checkbox {
+      display: flex;
+      gap: 10px;
+    }
   </style>
   <setting-panel>
     <setting-list data-direction="column">
       <setting-item>
         <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号"
           style="height: 25px; width: 100%; color: inherit" />
+      </setting-item>
+      <setting-item>
+        <div>
+          <setting-text>根据类型过滤</setting-text>
+        </div>
+        <div class="list-filter-type-checkbox">
+          <q-radio label="扩展" name="list-filter-type" value="extension"></q-radio>
+          <q-radio label="主题" name="list-filter-type" value="theme"></q-radio>
+          <q-radio label="依赖" name="list-filter-type" value="framework"></q-radio>
+          <!-- <label for="list-filter-type-extension">扩展</label><input type="radio" name="list-filter-type" id="list-filter-type-extension" value="extension">
+          <label for="list-filter-type-theme">主题</label><input type="radio" name="list-filter-type" id="list-filter-type-theme" value="theme">
+          <label for="list-filter-type-framework">依赖</label><input type="radio" name="list-filter-type" id="list-filter-type-framework" value="framework"> -->
+        </div>
       </setting-item>
       <setting-item data-direction="row">
         <div>

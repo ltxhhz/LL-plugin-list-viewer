@@ -1,7 +1,7 @@
 import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
-
+import { QCheck } from './components'
 import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType, thisSlug } from './utils'
 
 const listUrl = {
@@ -45,6 +45,23 @@ let currentItem: Plugin
 let currentManifest: Manifest
 let showDialog: (option: DialogOptions) => Promise<boolean | string | undefined>
 let filterInput: HTMLInputElement
+const filterTypes = {
+  extension: {
+    label: '扩展',
+    checked: true,
+    qc: {} as QCheck
+  },
+  theme: {
+    label: '主题',
+    checked: true,
+    qc: {} as QCheck
+  },
+  framework: {
+    label: '框架',
+    checked: true,
+    qc: {} as QCheck
+  }
+}
 
 export function onSettingWindowCreated(view: HTMLElement) {
   initConfig()
@@ -53,6 +70,22 @@ export function onSettingWindowCreated(view: HTMLElement) {
     .then(async res => {
       const doms = domParser.parseFromString(res, 'text/html')
       filterInput = doms.querySelector<HTMLInputElement>('#list-search')!
+      const typeFilterEl = doms.querySelector<HTMLDivElement>('.list-filter-type-checkbox')!
+      typeFilterEl.replaceChildren(
+        ...Object.keys(filterTypes).map(e1 => {
+          const e = filterTypes[e1]
+          const qc = new QCheck({
+            label: e.label,
+            checked: e.checked,
+            type: 'checkbox'
+          })
+          qc.inputEl.addEventListener('change', () => {
+            e.checked = qc.inputEl.checked
+          })
+          e.qc = qc
+          return qc.labelEl
+        })
+      )
       const refreshBtn = doms.querySelector<HTMLButtonElement>('.refresh-btn')!
       const totalEl = doms.querySelector<HTMLSpanElement>('.total-text')!
       const dialogInstall = doms.querySelector<HTMLDialogElement>('.list-dialog-install')!
@@ -400,6 +433,10 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
         LiteLoader.api.openExternal(`https://github.com/${pluginList[Number(this.dataset.index)].repo}/tree/${pluginList[Number(this.dataset.index)].branch}`)
       })
       filterInput.addEventListener('input', () => this.updateHidden())
+      for (const key in filterTypes) {
+        const item = filterTypes[key as keyof typeof filterTypes]
+        item.qc.inputEl.addEventListener('change', () => this.updateHidden())
+      }
       this.updateHidden()
       this.updateOpenDirEvent()
       this.#initialized = true
@@ -548,7 +585,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
       try {
         const authors: Array<{ name: string; link: string }> = this.dataset.authors === '1' ? this.manifest!.authors : []
         const str = (this.dataset.name || '') + (this.dataset.version || '') + (this.dataset.description || '') + (this.dataset.version || '') + authors.map(e => e.name).join('')
-        if (!filterInput.value || str.toLowerCase().includes(filterInput.value.toLowerCase())) {
+        if ((!filterInput.value || str.toLowerCase().includes(filterInput.value.toLowerCase())) && filterTypes[this.dataset.type!].checked) {
           this.hidden = false
         } else {
           this.hidden = true
