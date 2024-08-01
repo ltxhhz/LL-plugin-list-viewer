@@ -10,7 +10,7 @@ const listUrl = {
   file: 'plugins.json'
 }
 
-const defaultIcon = 'local://root/src/setting/static/default.png'
+const defaultIcon = 'local://root/src/settings/static/default.png'
 
 const domParser = new DOMParser()
 type DialogOptions = {
@@ -497,6 +497,10 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
               this.iconEl!.src = src || defaultIcon
               let num = 0
               this.iconEl!.addEventListener('error', () => {
+                if (this.iconEl!.src === defaultIcon) {
+                  // 防止下次出现 https://github.com/ltxhhz/LL-plugin-list-viewer/issues/30
+                  return
+                }
                 if (src1 && num < 3) {
                   //兼容打包方式（路径相对src，打包后才正常）
                   const iconPath = this.manifest!.icon!.replace(/^\.?\//, '')
