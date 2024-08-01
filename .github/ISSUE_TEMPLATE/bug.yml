@@ -1,6 +1,6 @@
 name: BUG 提交
 description: 插件不正常的情况
-title: '[bug]'
+# title: "[bug] 这里自己填"
 labels:
   - bug
 # assignees: ltxhhz
@@ -50,9 +50,16 @@ body:
       options:
         - 是
         - 否
+  - type: input
+    id: platform
+    validations:
+      required: true
+    attributes:
+      label: 使用平台
+      description: 系统和版本
   - type: markdown
     attributes:
-      value: '## 详细信息'
+      value: "## 详细信息"
   - type: textarea
     id: what-happened
     attributes:
