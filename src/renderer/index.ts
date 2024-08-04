@@ -744,6 +744,11 @@ async function install(release = false): Promise<HandleResult> {
     const urlObj = await getLatestReleaseUrl(currentItem)
     if (urlObj.zip) {
       url = urlObj.zip
+    } else if (urlObj.message) {
+      return {
+        success: false,
+        message: `github api 获取资产包失败\n\n${urlObj.message}`
+      }
     } else {
       const res = await showDialog({
         title: '未发现zip资产包',
@@ -813,16 +818,17 @@ function getArchiveUrl(item: Plugin) {
   return `https://github.com/${item.repo}/archive/refs/heads/${item.branch}.zip`
 }
 
-async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefined; ball: string }> {
+async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefined; ball: string; message: string | undefined }> {
   const url = `https://api.github.com/repos/${item.repo}/releases/latest`
   const body = await fetchWithTimeout(url)
     .then(e => e.json())
     .catch(err => {
       throw new Error(`${err.message} \n${url}`)
     })
-  const zipFile = body.assets.find(asset => asset.name.endsWith('.zip'))
+  const zipFile = body.assets?.find?.(asset => asset.name.endsWith('.zip'))
   return {
     zip: zipFile?.browser_download_url,
-    ball: `https://github.com/${item.repo}/archive/refs/tags/${body.tag_name}.zip` //body.zipball_url
+    ball: `https://github.com/${item.repo}/archive/refs/tags/${body.tag_name}.zip`, //body.zipball_url
+    message: body.message
   }
 }
