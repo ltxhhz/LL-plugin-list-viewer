@@ -29,7 +29,8 @@ export async function initConfig() {
       downloadUrl: ['https://cdn.jsdelivr.net/gh']
       // rawUrl: []
     },
-    listSortType: 'default'
+    listSortType: 'default',
+    githubToken: ''
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {

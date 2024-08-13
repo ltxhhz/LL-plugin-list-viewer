@@ -175,7 +175,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
           dialog.showModal()
           dialogResolve = (bool?: boolean) => {
             if (option.type === 'prompt') {
-              resolve(bool ? dialogInput.value : '')
+              resolve(bool ? dialogInput.value : null)
             } else {
               resolve(bool)
             }
@@ -209,6 +209,22 @@ jsdelivr镜像直接按默认那个写就行
           if (res) {
             config.mirrors.downloadUrl = (res as string).split('\n')
           }
+        })
+      }
+      const githubtokenSetBtn = doms.querySelector<HTMLButtonElement>('.githubtoken-set-btn')!
+      githubtokenSetBtn.onclick = () => {
+        showDialog({
+            title: '设置GithubToken',
+            type: 'prompt',
+            placeholder: '请输入GithubToken',
+            message: `请输入GithubToken，如果没有请留空，
+设置了GithubToken可以减少出现请求速领限制的问题
+前往 https://github.com/settings/tokens 获取`,
+            default: config.githubToken
+        }).then(res => {
+            if (res !== null) {
+              config.githubToken = res as string
+            }
         })
       }
 
