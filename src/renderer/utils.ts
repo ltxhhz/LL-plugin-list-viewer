@@ -17,6 +17,7 @@ export interface Config {
   }
   useMirror: boolean
   listSortType: SortType
+  githubToken: string
 }
 export let config: Config
 

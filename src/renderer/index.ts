@@ -43,7 +43,7 @@ const typeMap = {
 let pluginList: PluginList
 let currentItem: Plugin
 let currentManifest: Manifest
-let showDialog: (option: DialogOptions) => Promise<boolean | string | undefined>
+let showDialog: <T extends boolean | string | undefined>(option: DialogOptions) => Promise<T>
 let filterInput: HTMLInputElement
 const filterTypes = {
   extension: {
@@ -141,7 +141,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
         dialog.close()
         dialogResolve(false)
       })
-      showDialog = option => {
+      showDialog = <T extends boolean | string | undefined>(option: DialogOptions) => {
         let dialogInput: HTMLInputElement | HTMLTextAreaElement
         dialogTitle.innerText = option.title
         if (option.type === 'confirm' || option.type === 'message') {
@@ -171,13 +171,13 @@ export function onSettingWindowCreated(view: HTMLElement) {
         }
         dialogConfirm.innerText = option.confirm || '确定'
         dialogCancel.innerText = option.cancel || '取消'
-        return new Promise<boolean | string | undefined>(resolve => {
+        return new Promise<T>(resolve => {
           dialog.showModal()
           dialogResolve = (bool?: boolean) => {
             if (option.type === 'prompt') {
-              resolve(bool ? dialogInput.value : null)
+              resolve((bool ? dialogInput.value : '') as T)
             } else {
-              resolve(bool)
+              resolve(bool as T)
             }
           }
         })
@@ -191,7 +191,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
       }
       const mirrorAddBtn = doms.querySelector<HTMLButtonElement>('.mirror-add-btn')!
       mirrorAddBtn.onclick = () => {
-        showDialog({
+        showDialog<string>({
           title: '添加镜像',
           type: 'prompt',
           placeholder: '请输入镜像地址，每行一个',
@@ -207,24 +207,23 @@ jsdelivr镜像直接按默认那个写就行
           default: config.mirrors.downloadUrl.join('\n')
         }).then(res => {
           if (res) {
-            config.mirrors.downloadUrl = (res as string).split('\n')
+            config.mirrors.downloadUrl = res.split('\n')
           }
         })
       }
       const githubtokenSetBtn = doms.querySelector<HTMLButtonElement>('.githubtoken-set-btn')!
       githubtokenSetBtn.onclick = () => {
-        showDialog({
-            title: '设置GithubToken',
-            type: 'prompt',
-            placeholder: '请输入GithubToken',
-            message: `请输入GithubToken，如果没有请留空，
-设置了GithubToken可以减少出现请求速领限制的问题
-前往 https://github.com/settings/tokens 获取`,
-            default: config.githubToken
+        showDialog<string>({
+          title: '设置GithubToken',
+          type: 'prompt',
+          placeholder: '请输入GithubToken',
+          message: `请输入GithubToken，如果没有请留空，设置了GithubToken可以减少出现请求速领限制的问题
+前往 https://github.com/settings/tokens 获取，scope 选择 repo > public_repo`,
+          default: config.githubToken
         }).then(res => {
-            if (res !== null) {
-              config.githubToken = res as string
-            }
+          if (res) {
+            config.githubToken = res
+          }
         })
       }
 
@@ -413,7 +412,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
         config.debug && console.log('uninstall', this.manifest!.name)
         currentItem = pluginList[Number(this.dataset.index)]
         currentManifest = this.manifest!
-        showDialog({ title: '卸载', message: `确定要卸载插件 ${this.manifest!.name} 吗？`, type: 'confirm' }).then(e => {
+        showDialog<boolean>({ title: '卸载', message: `确定要卸载插件 ${this.manifest!.name} 吗？`, type: 'confirm' }).then(e => {
           if (e) {
             this.uninstallBtnEl!.innerText = '卸载中...'
             this.uninstallBtnEl!.setAttribute('is-disabled', '')
@@ -766,7 +765,7 @@ async function install(release = false): Promise<HandleResult> {
         message: `github api 获取资产包失败\n\n${urlObj.message}`
       }
     } else {
-      const res = await showDialog({
+      const res = await showDialog<boolean>({
         title: '未发现zip资产包',
         message: '是否使用源代码包安装？',
         type: 'confirm'
@@ -836,7 +835,13 @@ function getArchiveUrl(item: Plugin) {
 
 async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefined; ball: string; message: string | undefined }> {
   const url = `https://api.github.com/repos/${item.repo}/releases/latest`
-  const body = await fetchWithTimeout(url)
+  const headers: Record<string, string> = {}
+  if (config.githubToken) {
+    headers.Authorization = `Bearer ${config.githubToken}`
+  }
+  const body = await fetchWithTimeout(url, {
+    headers
+  })
     .then(e => e.json())
     .catch(err => {
       throw new Error(`${err.message} \n${url}`)
