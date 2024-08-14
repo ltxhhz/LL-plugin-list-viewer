@@ -1,7 +1,6 @@
 # LiteLoaderQQNT Plugin 插件列表查看
 
-> [!NOTE]
-> 该插件仅在 Windows 环境下测试开发，未对其他平台进行测试，不保证可用性
+> [!NOTE] 该插件仅在 Windows 环境下测试开发，未对其他平台进行测试，不保证可用性
 >
 > 喜欢的话不要吝啬你 star~
 
@@ -39,7 +38,7 @@ npm i
 npm run build
 ```
 
-3. 如果clone到了 `plugins` 目录下，修改 `manifest.json` 中 `inject` 为
+3. 如果 clone 到了 `plugins` 目录下，修改 `manifest.json` 中 `inject` 为
 
 ```json
 "injects": {
@@ -56,6 +55,8 @@ npm run build
 `manifest.json` 文件需要严格按照 [LiteLoader 的文档要求](https://liteloaderqqnt.github.io/docs/introduction.html#manifest-json) 进行编写。
 
 > p.s.有一部分插件将字段 `authors:[{}]` 写成了 `author:{}`，这会导致插件开发者显示为空(LiteLoader 中也会)，这里不会做适配。
+
+如果插件的发行版中除了 LiteLoader 插件还有其他压缩包，如 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)，建议将 LiteLoader 插件压缩包以 `mainifest.json` 中 `slug` 或 `name` 命名。
 
 ## 已知的问题
 
