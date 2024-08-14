@@ -21,10 +21,12 @@
 
 ## 使用方法
 
+支持 LiteLoader 1.x
+
 ### 下载发行版
 
-1. 下载发行版并解压
-2. 将文件夹移动至 `LiteLoaderQQNT数据目录/plugins/` 下面
+1. 下载[发行版（release）](https://github.com/ltxhhz/LL-plugin-list-viewer/releases/latest)并解压（解压到当前目录即可，不需要额外新建文件夹）
+2. 将解压出的文件夹移动至 `LiteLoaderQQNT数据目录/plugins/` 下面
 3. 重启 QQNT
 
 ### 使用 git clone
