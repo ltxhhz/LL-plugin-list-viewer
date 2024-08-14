@@ -18,6 +18,7 @@ export interface Config {
   useMirror: boolean
   listSortType: SortType
   githubToken: string
+  listLastForceUpdate: number
 }
 export let config: Config
 
@@ -31,7 +32,8 @@ export async function initConfig() {
       // rawUrl: []
     },
     listSortType: 'default',
-    githubToken: ''
+    githubToken: '',
+    listLastForceUpdate: 0
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
@@ -182,7 +184,17 @@ export function getRedirectedGitHubUrl(url: string) {
     const branch = match[3]
     const filePath = match[4]
     return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filePath}`
-  } 
+  }
   // throw new Error('Invalid GitHub URL')
   return
+}
+
+/**
+ * 判断时间戳是否和今天是同一天
+ */
+export function isSameDay(timestamp: number) {
+  const inputDate = new Date(timestamp)
+  const currentDate = new Date()
+
+  return inputDate.getFullYear() === currentDate.getFullYear() && inputDate.getMonth() === currentDate.getMonth() && inputDate.getDate() === currentDate.getDate()
 }

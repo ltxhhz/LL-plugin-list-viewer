@@ -2,7 +2,7 @@ import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
 import { QCheck } from './components'
-import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType, thisSlug } from './utils'
+import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType, thisSlug, isSameDay } from './utils'
 
 const listUrl = {
   repo: 'LiteLoaderQQNT/Plugin-List',
@@ -272,8 +272,14 @@ jsdelivr镜像直接按默认那个写就行
       const getList1 = (noCache = false) => {
         refreshBtn.setAttribute('is-disabled', '')
         sortSelect.setAttribute('is-disabled', '')
+        if (!noCache && !isSameDay(config.listLastForceUpdate)) {
+          noCache = true
+        }
         listLoadingPromise = getList(noCache)
           .then(async list => {
+            if (noCache) {
+              config.listLastForceUpdate = +new Date()
+            }
             if (typeof list === 'string') {
               showDialog({
                 title: '获取列表失败',
