@@ -1,19 +1,10 @@
 <style>
   img.icon {
     width: 60px;
+    min-height: 60px;
     border-radius: 10px;
     position: relative;
-  }
-
-  img.icon::after {
-    content: "";
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    background: url(local://root/src/setting/static/default.png) no-repeat center;
-    background-size: 100%;
+    flex-shrink: 0;
   }
 
   :host(.highlight-item) .plugin-item-info {
@@ -53,6 +44,26 @@
   .dependencies a {
     color: green;
     cursor: pointer;
+  }
+
+  .description {
+    white-space: pre-wrap;
+    /* background-color: green; */
+    display: block;
+  }
+
+  .text {
+    /* word-break:keep-all; */
+    text-overflow: ellipsis;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .text.secondary {
+    color: var(--text_secondary);
+    font-size: min(var(--font_size_2), 16px);
+    line-height: min(var(--line_height_2), 22px);
+    margin-top: 4px;
   }
 
   .failed,
@@ -117,18 +128,18 @@
     <div style="display: flex; gap: 10px; margin-bottom: 10px">
       <img class="icon" src="" />
       <div>
-        <setting-text>
+        <div class="text">
           <span class="title" title="插件名">插件名</span>
           <span class="inactive-tag" title="需要重启qq">(未激活)</span>
           <span class="lower4" title="manifest版本小于4">(&lt;4)</span>
           <span class="run-away" title="404 Not Found">(疑似跑路)</span>
-        </setting-text>
-        <setting-text data-type="secondary">
-          <span class="description" title="插件描述">插件描述</span>
-        </setting-text>
+        </div>
+        <div class="text secondary">
+          <div class="description" title="插件描述">插件描述</div>
+        </div>
       </div>
     </div>
-    <setting-text data-type="secondary">
+    <div class="text secondary">
       <div style="display: flex;gap: 5px 30px;flex-wrap: wrap;">
         <span>版本：<span class="version">版本</span><span class="newer-version"></span>
         </span>
@@ -137,7 +148,7 @@
         <span>平台：<span class="platforms"></span></span>
         <span class="dependencies">依赖：<span class="items"></span></span>
       </div>
-    </setting-text>
+    </div>
   </div>
   <div class="manipulate">
     <setting-button class="success update" data-type="primary">更新</setting-button>
