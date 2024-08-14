@@ -771,7 +771,7 @@ async function install(release = false): Promise<HandleResult> {
   config.debug && console.log('install', currentItem)
 
   if (release) {
-    const urlObj = await getLatestReleaseUrl(currentItem)
+    const urlObj = await getLatestReleaseUrl(currentItem, currentManifest)
     if (urlObj.zip) {
       url = urlObj.zip
     } else if (urlObj.message) {
@@ -848,7 +848,7 @@ function getArchiveUrl(item: Plugin) {
   return `https://github.com/${item.repo}/archive/refs/heads/${item.branch}.zip`
 }
 
-async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefined; ball: string; message: string | undefined }> {
+async function getLatestReleaseUrl(item: Plugin, manifest: Manifest): Promise<{ zip: string | undefined; ball: string; message: string | undefined }> {
   const url = `https://api.github.com/repos/${item.repo}/releases/latest`
   const headers: Record<string, string> = {}
   if (config.githubToken) {
@@ -861,7 +861,9 @@ async function getLatestReleaseUrl(item: Plugin): Promise<{ zip: string | undefi
     .catch(err => {
       throw new Error(`${err.message} \n${url}`)
     })
-  const zipFile = body.assets?.find?.(asset => asset.name.endsWith('.zip'))
+  const zipFile = body.assets?.find?.(asset => asset.name === (`${manifest.slug}.zip`))
+    ?? body.assets?.find?.(asset => asset.name === (`${manifest.name}.zip`))
+    ?? body.assets?.find?.(asset => asset.name.endsWith('.zip'))
   return {
     zip: zipFile?.browser_download_url,
     ball: `https://github.com/${item.repo}/archive/refs/tags/${body.tag_name}.zip`, //body.zipball_url
