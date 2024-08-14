@@ -608,7 +608,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
       try {
         const authors: Array<{ name: string; link: string }> = this.dataset.authors === '1' ? this.manifest!.authors : []
         const str = (this.dataset.name || '') + (this.dataset.version || '') + (this.dataset.description || '') + (this.dataset.version || '') + authors.map(e => e.name).join('')
-        if ((!filterInput.value || str.toLowerCase().includes(filterInput.value.toLowerCase())) && filterTypes[this.dataset.type!].checked) {
+        if ((!filterInput.value || str.toLowerCase().includes(filterInput.value.toLowerCase())) && (filterTypes[this.dataset.type!]?.checked ?? true)) {
           this.hidden = false
         } else {
           this.hidden = true
