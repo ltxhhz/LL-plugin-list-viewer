@@ -438,7 +438,9 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
         this.retryBtnEl!.innerText = '重试中...'
         this.retryBtnEl!.setAttribute('is-disabled', '')
         const manifest = await getManifest(pluginList[Number(this.dataset.index)])
-        this.manifest = manifest
+        if (manifest !== 404) {
+          this.manifest = manifest
+        }
         updateElProp(this, manifest, this.dataset.failed!)
         this.retryBtnEl!.innerText = '重试'
         this.retryBtnEl!.removeAttribute('is-disabled')
@@ -614,8 +616,8 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
   return new PluginListClass()
 }
 
-function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: string) {
-  if (manifest) {
+function updateElProp(el: PluginItemElement, manifest: Manifest | null | 404, repo: string) {
+  if (manifest !== 404 && manifest !== null) {
     el.id = `item-${manifest.slug}`
     el.dataset.name = manifest.name
     el.manifest = manifest
@@ -648,6 +650,9 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null, repo: st
     }
   } else {
     el.dataset.failed = repo
+    if (manifest === 404) {
+      el.dataset.run = '1'
+    }
   }
 }
 
@@ -674,7 +679,7 @@ async function getList(noCache = false, again = false): Promise<PluginList | str
     })
 }
 
-async function getManifest(item: Plugin, noCache = false, again = false): Promise<Manifest | null> {
+async function getManifest(item: Plugin, noCache = false, again = false): Promise<Manifest | null | 404> {
   // if (item.repo === 'ltxhhz/LL-plugin-list-viewer') {
   //   return Promise.resolve({
   //     $schema: './manifest_schema.json',
@@ -734,6 +739,10 @@ async function getManifest(item: Plugin, noCache = false, again = false): Promis
               obj.description = pkg.description
               obj.authors = typeof pkg.author === 'string' ? [{ name: pkg.author, link: `https://github.com/${pkg.author}` }] : [pkg.author]
               return obj
+            }
+          } else {
+            if (res.status === 404 || res1.status === 404) {
+              return 404
             }
           }
           return null

@@ -61,7 +61,8 @@
   .inactive-tag,
   .newer-version,
   .dependencies,
-  .lower4 {
+  .lower4,
+  .run-away {
     display: none;
   }
 
@@ -104,6 +105,12 @@
     color: var(--feedback_warning);
     padding-left: 5px;
   }
+
+  :host([data-run='1']) .run-away {
+    display: inline;
+    color: var(--feedback_error);
+    padding-left: 5px;
+  }
 </style>
 <setting-item data-direction="row">
   <div class="plugin-item-info">
@@ -112,8 +119,9 @@
       <div>
         <setting-text>
           <span class="title" title="插件名">插件名</span>
-          <span class="inactive-tag">(未激活)</span>
+          <span class="inactive-tag" title="需要重启qq">(未激活)</span>
           <span class="lower4" title="manifest版本小于4">(&lt;4)</span>
+          <span class="run-away" title="404 Not Found">(疑似跑路)</span>
         </setting-text>
         <setting-text data-type="secondary">
           <span class="description" title="插件描述">插件描述</span>
