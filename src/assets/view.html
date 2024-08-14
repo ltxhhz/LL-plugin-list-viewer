@@ -54,7 +54,8 @@
       white-space: pre-wrap;
     }
 
-    .version-text a {
+    .version-text a,
+    .list-repo {
       color: #81adef;
       cursor: pointer;
     }
@@ -87,7 +88,8 @@
         <div>
           <setting-text>
             <span style="margin-right: 10px;">插件版本：<span class="version-text"></span></span>
-            <span>插件总数：<span class="total-text"></span></span>
+            <span style="margin-right: 10px;">插件总数：<span class="total-text"></span></span>
+            <span style="margin-right: 10px;"><a class="list-repo">列表仓库</a></span>
           </setting-text>
           <setting-text data-type="secondary">
             刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新

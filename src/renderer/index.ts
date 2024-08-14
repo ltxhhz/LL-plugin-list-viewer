@@ -104,6 +104,10 @@ export function onSettingWindowCreated(view: HTMLElement) {
       }
       versionA.innerText = LiteLoader.plugins[thisSlug].manifest.version
       versionEl.append(versionA)
+      const listRepoA = doms.querySelector<HTMLAnchorElement>('a.list-repo')
+      listRepoA!.onclick = () => {
+        LiteLoader.api.openExternal(`https://github.com/${listUrl.repo}/tree/${listUrl.branch}`)
+      }
       // const mirrorSelect = doms.querySelector<HTMLSelectElement>('.select-mirror')!
       let resFunc: (value?: boolean | PromiseLike<boolean>) => void
       dialogInstallClose.addEventListener('click', () => {
@@ -861,9 +865,10 @@ async function getLatestReleaseUrl(item: Plugin, manifest: Manifest): Promise<{ 
     .catch(err => {
       throw new Error(`${err.message} \n${url}`)
     })
-  const zipFile = body.assets?.find?.(asset => asset.name === (`${manifest.slug}.zip`))
-    ?? body.assets?.find?.(asset => asset.name === (`${manifest.name}.zip`))
-    ?? body.assets?.find?.(asset => asset.name.endsWith('.zip'))
+  const zipFile =
+    body.assets?.find?.(asset => asset.name === `${manifest.slug}.zip`) ??
+    body.assets?.find?.(asset => asset.name === `${manifest.name}.zip`) ??
+    body.assets?.find?.(asset => asset.name.endsWith('.zip'))
   return {
     zip: zipFile?.browser_download_url,
     ball: `https://github.com/${item.repo}/archive/refs/tags/${body.tag_name}.zip`, //body.zipball_url
