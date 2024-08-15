@@ -1,6 +1,7 @@
 # LiteLoaderQQNT Plugin 插件列表查看
 
-> [!NOTE] 该插件仅在 Windows 环境下测试开发，未对其他平台进行测试，不保证可用性
+> [!NOTE]
+> 该插件仅在 Windows 环境下测试开发，未对其他平台进行测试，不保证可用性
 >
 > 喜欢的话不要吝啬你 star~
 
@@ -24,8 +25,8 @@
 
 ### 下载发行版
 
-1. 下载[发行版（release）](https://github.com/ltxhhz/LL-plugin-list-viewer/releases/latest)并解压（解压到当前目录即可，不需要额外新建文件夹）
-2. 将解压出的文件夹移动至 `LiteLoaderQQNT数据目录/plugins/` 下面
+1. 下载[发行版（release）](https://github.com/ltxhhz/LL-plugin-list-viewer/releases/latest)并解压到某个文件夹中
+2. 将解压到的文件夹移动至 `LiteLoaderQQNT数据目录/plugins/` 下面
 3. 重启 QQNT
 
 ### 使用 git clone
