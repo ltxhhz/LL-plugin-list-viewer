@@ -3,7 +3,7 @@ import { defineConfig as defineViteConfig } from 'vite'
 import { resolve } from 'path'
 import viteChecker from 'vite-plugin-checker'
 import viteCp from 'vite-plugin-cp'
-import viteZipPack from 'unplugin-zip-pack/vite'
+import viteZipPack from 'vite-plugin-zip-pack'
 import PluginManifest from './manifest.json'
 
 const SRC_DIR = resolve(__dirname, './src')
@@ -61,8 +61,9 @@ export default defineConfig({
         ]
       }),
       viteZipPack({
-        in: OUTPUT_DIR,
-        out: resolve(__dirname, `./${PluginManifest.slug}.zip`)
+        inDir: OUTPUT_DIR,
+        outDir: __dirname,
+        outFileName: `${PluginManifest.slug}.zip`
       })
     ],
     build: {
