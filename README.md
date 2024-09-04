@@ -57,7 +57,7 @@ npm run build
 
 > p.s.有一部分插件将字段 `authors:[{}]` 写成了 `author:{}`，这会导致插件开发者显示为空(LiteLoader 中也会)，这里不会做适配。
 
-如果插件的发行版中除了 LiteLoader 插件还有其他压缩包，如 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)，建议将 LiteLoader 插件压缩包以 `mainifest.json` 中 `slug` 或 `name` 命名。
+如果插件的发行版中除了 LiteLoader 插件还有其他压缩包，如 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)，建议将 LiteLoader 插件压缩包以 `mainifest.json` 中 `slug` 或 `name` 命名。(v1.3.10+)
 
 ## 已知的问题
 

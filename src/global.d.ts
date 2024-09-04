@@ -85,11 +85,18 @@ declare global {
       openExternal: (url: string) => void
       disablePlugin: (slug: string) => void
       config: ILiteLoaderAPIConfig
+      plugin?: ILiteLoaderAPIPlugin
     }
 
     interface ILiteLoaderAPIConfig {
       set: <IConfig = unknown>(slug: string, new_config: IConfig) => unknown
       get: <IConfig = unknown>(slug: string, default_config?: IConfig) => IConfig | PromiseLike<IConfig>
+    }
+
+    interface ILiteLoaderAPIPlugin {
+      install: (file_path: string, undone = false) => void
+      delete: (slug: string, delete_data = false, undone = false) => void
+      disable: (slug: string, undone = false) => void
     }
   }
 
