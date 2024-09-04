@@ -114,11 +114,24 @@ function request(url: string): Promise<{
 
 async function installPlugin(cache_file_path: string, slug: string): Promise<HandleResult> {
   const { plugins } = LiteLoader.path
-  const plugin_path = LiteLoader.plugins[slug]?.path?.plugin || path.join(plugins, slug)
+  let plugin_path = LiteLoader.plugins[slug]?.path?.plugin || path.join(plugins, slug)
+  let isManual = false
   try {
     // 解压并安装插件
     if (fs.existsSync(plugin_path)) {
-      fs.rmSync(plugin_path, { recursive: true, force: true })
+      try {
+        fs.rmSync(plugin_path, { recursive: true, force: true })
+      } catch (error: any) {
+        // if (error.code === 'EPERM') {
+        output('删除旧插件失败，使用手动方式', error)
+        isManual = true
+        plugin_path += '[list-viewer-updated]'
+        if (fs.existsSync(plugin_path)) {
+          throw new Error(`你真tm 够懒的，重命名都不会吗：${plugin_path}`)
+        }
+        // }
+        // throw error
+      }
     }
     fs.mkdirSync(plugin_path, { recursive: true })
     output('开始解压', cache_file_path)
@@ -162,7 +175,10 @@ async function installPlugin(cache_file_path: string, slug: string): Promise<Han
     fs.rmSync(cache_file_path, { force: true })
     output('删除完成', cache_file_path)
     return {
-      success: true
+      success: true,
+      data: {
+        isManual
+      }
     }
   } catch (error: any) {
     dialog.showErrorBox('插件列表查看', error.stack || error.message)

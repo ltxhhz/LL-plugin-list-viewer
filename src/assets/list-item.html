@@ -73,7 +73,8 @@
   .newer-version,
   .dependencies,
   .lower4,
-  .run-away {
+  .run-away,
+  .manual-update {
     display: none;
   }
 
@@ -122,6 +123,12 @@
     color: var(--feedback_error);
     padding-left: 5px;
   }
+
+  :host([data-manual-update='1']) .manual-update {
+    display: inline;
+    color: var(--feedback_warning);
+    padding-left: 5px;
+  }
 </style>
 <setting-item data-direction="row">
   <div class="plugin-item-info">
@@ -133,6 +140,7 @@
           <span class="inactive-tag" title="需要重启qq">(未激活)</span>
           <span class="lower4" title="manifest版本小于4">(&lt;4)</span>
           <span class="run-away" title="404 Not Found">(疑似跑路)</span>
+          <span class="manual-update" >(需要手动更新)</span>
         </div>
         <div class="text secondary">
           <div class="description" title="插件描述">插件描述</div>

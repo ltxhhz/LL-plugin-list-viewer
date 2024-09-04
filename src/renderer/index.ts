@@ -148,10 +148,9 @@ export function onSettingWindowCreated(view: HTMLElement) {
       showDialog = <T extends boolean | string | undefined>(option: DialogOptions) => {
         let dialogInput: HTMLInputElement | HTMLTextAreaElement
         dialogTitle.innerText = option.title
+        config.debug && console.log('showDialog', JSON.parse(JSON.stringify(option)))
         if (option.type === 'confirm' || option.type === 'message') {
-          if (option.message) {
-            dialogContent.innerText = option.message
-          }
+          dialogContent.innerText = option.message || ''
           if (option.content) {
             if (typeof option.content === 'string') {
               dialogContent.innerHTML = option.content
@@ -161,6 +160,8 @@ export function onSettingWindowCreated(view: HTMLElement) {
           }
           if (option.type === 'message') {
             dialogCancel.style.display = 'none'
+          } else {
+            dialogCancel.style.removeProperty('display')
           }
         } else if (option.type === 'prompt') {
           dialogInput = option.textarea ? document.createElement('textarea') : document.createElement('input')
@@ -392,7 +393,23 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                 if (res.success) {
                   this.dataset.installed = '1'
                   this.dataset.inactive = '1'
-                  if (update) delete this.dataset.update
+                  if (update) {
+                    delete this.dataset.update
+                    if (res.data?.isManual) {
+                      this.dataset.manualUpdate = '1'
+                      showDialog<boolean>({
+                        title: '手动更新',
+                        message: '请手动更新插件，在退出 qq 后，删除原文件夹，重命名带"[list-viewer-updated]"的新文件夹，',
+                        type: 'confirm',
+                        confirm: '打开插件文件夹',
+                        cancel: '稍后再去'
+                      }).then(e => {
+                        if (e) {
+                          LiteLoader.api.openPath(LiteLoader.path.plugins)
+                        }
+                      })
+                    }
+                  }
                   config.inactivePlugins.push(this.manifest!.slug)
                   this.updateOpenDirEvent()
                 } else if (res.message) {
