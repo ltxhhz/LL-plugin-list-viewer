@@ -8,12 +8,13 @@
     "lint": "npx eslint --fix src/**/* --ext .js,.ts",
     "build": "npx electron-vite build",
     "build-test": "npm run build && xcopy .\\dist\\* \"..\\..\\work space\\LiteLoaderQQNT\\plugins\\list-viewer\\\" /S /Y",
+    "move-test": "xcopy .\\dist\\* \"..\\..\\work space\\LiteLoaderQQNT\\plugins\\list-viewer\\\" /S /Y",
     "bump-patch": "node bump.cjs --patch",
     "bump-minor": "node bump.cjs --minor",
     "bump-major": "node bump.cjs --major"
   },
   "author": "ltxhhz",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
@@ -30,7 +31,11 @@
   },
   "dependencies": {
     "compare-versions": "^6.1.0",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.5",
     "node-stream-zip": "^1.15.0",
-    "p-limit": "^5.0.0"
+    "p-limit": "^5.0.0",
+    "proxy-agent": "^6.4.0",
+    "socks-proxy-agent": "^8.0.4"
   }
 }

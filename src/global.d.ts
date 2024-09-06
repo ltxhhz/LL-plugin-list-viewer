@@ -15,8 +15,34 @@ export interface GlobalMethods {
     log: (...args: any[]) => void
     getPkg: (slug: string, url: string) => Promise<HandleResult>
     removePkg: (slug: string, removeData?: boolean) => Promise<HandleResult>
-    // request: (url: string, timeout: number) => Promise<HandleResult>
+    request: (url: string, option?: RequestOptions) => Promise<HandleResult>
   }
+}
+
+export interface Config {
+  debug: boolean
+  inactivePlugins: string[]
+  mirrors: {
+    downloadUrl: string[]
+    // rawUrl: string[]
+  }
+  useMirror: boolean
+  listSortType: SortType
+  githubToken: string
+  listLastForceUpdate: number
+  proxy: {
+    url: string
+    enabled: boolean
+  }
+}
+
+export interface RequestOptions {
+  method?: 'GET' | 'POST'
+  proxy?: string
+  body?: any
+  headers?: Record<string, string>
+  agent?: ProxyAgent
+  timeout?: number
 }
 
 export type Plugin = { repo: string; branch: string }

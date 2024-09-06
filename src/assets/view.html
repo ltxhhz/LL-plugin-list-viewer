@@ -102,7 +102,7 @@
       <setting-item data-direction="row">
         <div>
           <setting-text>是否使用镜像</setting-text>
-          <setting-text data-type="secondary">设置系统代理时建议关闭</setting-text>
+          <setting-text data-type="secondary">使用代理时建议关闭</setting-text>
         </div>
         <div class="manipulate">
           <!-- <div>
@@ -116,6 +116,16 @@
             <setting-option data-value="2">2</setting-option>
             <setting-option data-value="3">3</setting-option>
           </setting-select> -->
+        </div>
+      </setting-item>
+      <setting-item data-direction="row">
+        <div>
+          <setting-text>是否使用代理</setting-text>
+          <setting-text data-type="secondary">如果启用且未设置地址会自动获取环境代理，Windows 设置系统代理无效，对页面图片无效</setting-text>
+        </div>
+        <div class="manipulate">
+          <setting-switch class="proxy-switch" is-active></setting-switch>
+          <setting-button class="proxy-set-btn" data-type="secondary">设置代理</setting-button>
         </div>
       </setting-item>
       <setting-item data-direction="row">

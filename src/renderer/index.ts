@@ -180,8 +180,10 @@ export function onSettingWindowCreated(view: HTMLElement) {
           dialog.showModal()
           dialogResolve = (bool?: boolean) => {
             if (option.type === 'prompt') {
-              resolve((bool ? dialogInput.value : '') as T)
+              config.debug && console.log('prompt result:', bool ? dialogInput.value : undefined)
+              resolve((bool ? dialogInput.value : undefined) as T)
             } else {
+              config.debug && console.log('dialog result:', bool)
               resolve(bool as T)
             }
           }
@@ -211,8 +213,31 @@ jsdelivr镜像直接按默认那个写就行
           textarea: true,
           default: config.mirrors.downloadUrl.join('\n')
         }).then(res => {
-          if (res) {
+          if (typeof res === 'string') {
             config.mirrors.downloadUrl = res.split('\n')
+          }
+        })
+      }
+      const proxySwitch = doms.querySelector<HTMLInputElement>('.proxy-switch')!
+      proxySwitch.toggleAttribute('is-active', config.proxy.enabled)
+      proxySwitch.onclick = () => {
+        const isActive = proxySwitch.hasAttribute('is-active')
+        proxySwitch.toggleAttribute('is-active', !isActive)
+        config.proxy.enabled = !isActive
+        console.log(isActive);
+        
+      }
+      const proxySetBtn = doms.querySelector<HTMLButtonElement>('.proxy-set-btn')!
+      proxySetBtn.onclick = () => {
+        showDialog<string>({
+          title: '设置代理',
+          type: 'prompt',
+          placeholder: '请输入代理地址',
+          message: `请输入代理地址，支持 http、socks，比如 socks://127.0.0.1:10808`,
+          default: config.proxy.url
+        }).then(res => {
+          if (typeof res === 'string') {
+            config.proxy.url = res
           }
         })
       }
@@ -390,6 +415,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
             }
             install(res)
               .then(res => {
+                console.log('安装成功', res)
                 if (res.success) {
                   this.dataset.installed = '1'
                   this.dataset.inactive = '1'
@@ -412,14 +438,16 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                   }
                   config.inactivePlugins.push(this.manifest!.slug)
                   this.updateOpenDirEvent()
-                } else if (res.message) {
+                } else {
                   showDialog({ title: '安装失败', message: res.message, type: 'message' })
                 }
               })
               .catch(e => {
+                console.log('安装失败', e)
                 showDialog({ title: '安装失败', message: e.message, type: 'message' })
               })
               .finally(() => {
+                console.log('安装结束')
                 if (update) {
                   this.updateBtnEl!.removeAttribute('is-disabled')
                   this.updateBtnEl!.innerText = '更新'
@@ -694,7 +722,7 @@ async function getList(noCache = false, again = false): Promise<PluginList | str
   return await fetchWithTimeout(url, {
     cache: noCache ? 'no-cache' : 'default'
   })
-    .then(res => (res.status === 200 ? res.json() : null))
+    .then(res => (res.status === 200 ? JSON.parse(res.str) : null))
     .catch(err => {
       if (again) {
         console.error(`getList ${url}`, err)
@@ -747,7 +775,7 @@ async function getManifest(item: Plugin, noCache = false, again = false): Promis
   })
     .then(res => {
       if (res.status === 200) {
-        return res.json()
+        return JSON.parse(res.str)
       } else {
         m = getGithubMirror(!again)
         if (config.useMirror) {
@@ -759,7 +787,7 @@ async function getManifest(item: Plugin, noCache = false, again = false): Promis
           cache: noCache ? 'no-cache' : 'default'
         }).then(async res1 => {
           if (res1.status === 200) {
-            const pkg = await res1.json()
+            const pkg = JSON.parse(res1.str)
             const obj = pkg.liteloader_manifest
             if (obj) {
               obj.version = pkg.version
@@ -878,7 +906,7 @@ async function getLatestReleaseUrl(item: Plugin, manifest: Manifest): Promise<{ 
   const body = await fetchWithTimeout(url, {
     headers
   })
-    .then(e => e.json())
+    .then(e => JSON.parse(e.str))
     .catch(err => {
       throw new Error(`${err.message} \n${url}`)
     })

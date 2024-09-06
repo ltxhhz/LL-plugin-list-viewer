@@ -1,10 +1,10 @@
 import { ipcMain, IpcMainEvent, dialog, IpcMainInvokeEvent } from 'electron'
-import { GlobalMethods, HandleResult } from '../global'
+import type { GlobalMethods, HandleResult, Config } from '../global'
 import fs from 'fs'
 import path from 'path'
 import StreamZip from 'node-stream-zip'
-import http from 'http'
-import https from 'https'
+import { request } from './utils'
+import { ProxyAgent } from 'proxy-agent'
 
 const thisSlug = 'list-viewer'
 
@@ -21,12 +21,17 @@ const handle = <K extends keyof GlobalMethods['ListViewer']>(
 // }
 
 listen('log', (_, args) => {
-  output(args)
+  const cfg = LiteLoader.api.config.get<Config>(thisSlug) as Config
+  cfg.debug && output(args)
 })
 
 handle('getPkg', async (_, slug, url) => {
   output('安装', slug, url)
-  return await request(url)
+  const cfg = LiteLoader.api.config.get<Config>(thisSlug) as Config
+  return await request(url, {
+    proxy: cfg.proxy.enabled ? cfg.proxy.url : undefined,
+    agent: cfg.proxy.enabled && !cfg.proxy.url ? new ProxyAgent() : undefined
+  })
     .then(res => {
       output('下载完成', slug)
       const zip = path.join(LiteLoader.plugins[thisSlug].path.data, `${slug}.zip`)
@@ -76,40 +81,29 @@ handle('removePkg', async (_e, slug, removeData = false): Promise<HandleResult> 
   }
 })
 
-// handle('request',(_,url,timeout)=>{
-//   return request(url)
-// })
+handle('request', async (_, url, opt): Promise<HandleResult> => {
+  const cfg = LiteLoader.api.config.get<Config>(thisSlug) as Config
+  output('正在请求', cfg, url, opt)
+  try {
+    const res = await request(url, {
+      ...opt,
+      proxy: cfg.proxy.enabled ? cfg.proxy.url : undefined,
+      agent: cfg.proxy.enabled && !cfg.proxy.url ? new ProxyAgent() : undefined
+    })
+    return {
+      success: true,
+      data: res
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message
+    }
+  }
+})
 
 function output(...args: any[]) {
   console.log('\x1b[32m[ListViewer]\x1b[0m', ...args)
-}
-
-function request(url: string): Promise<{
-  data: Buffer
-  str: string
-  url?: string
-}> {
-  return new Promise((resolve, reject) => {
-    const protocol = url.startsWith('https') ? https : http
-    const req = protocol.get(url)
-    req.on('error', reject)
-    req.on('response', res => {
-      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400) {
-        return resolve(request(res.headers.location!))
-      }
-      const chunks = <any>[]
-      res.on('error', error => reject(error))
-      res.on('data', chunk => chunks.push(chunk))
-      res.on('end', () => {
-        const data = Buffer.concat(chunks)
-        resolve({
-          data: data,
-          str: data.toString('utf-8'),
-          url: res.url
-        })
-      })
-    })
-  })
 }
 
 async function installPlugin(cache_file_path: string, slug: string): Promise<HandleResult> {

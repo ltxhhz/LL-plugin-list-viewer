@@ -1,5 +1,7 @@
 // 接口来自 https://github.com/XIU2/UserScript/blob/master/GithubEnhanced-High-Speed-Download.user.js
 
+import type { Config } from '../global'
+
 const mirrorRepo = 'https://github.com/XIU2/UserScript/blob/master/GithubEnhanced-High-Speed-Download.user.js'
 const hostReg = /^https?:\/\/[^/]+/
 
@@ -8,18 +10,6 @@ export const thisSlug = 'list-viewer'
 
 export type SortType = 'default' | 'installed' | 'outdated'
 
-export interface Config {
-  debug: boolean
-  inactivePlugins: string[]
-  mirrors: {
-    downloadUrl: string[]
-    // rawUrl: string[]
-  }
-  useMirror: boolean
-  listSortType: SortType
-  githubToken: string
-  listLastForceUpdate: number
-}
 export let config: Config
 
 export async function initConfig() {
@@ -33,7 +23,11 @@ export async function initConfig() {
     },
     listSortType: 'default',
     githubToken: '',
-    listLastForceUpdate: 0
+    listLastForceUpdate: 0,
+    proxy: {
+      url: '',
+      enabled: false
+    }
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
@@ -44,6 +38,10 @@ export async function initConfig() {
   config = deepWatch(config, () => {
     save(config)
   })
+
+  setInterval(() => {
+    console.log(config instanceof Proxy)
+  }, 2e3)
 }
 export function getDynamicMirror() {
   const m = getRandomItem(originMirrors)
@@ -51,36 +49,34 @@ export function getDynamicMirror() {
   return fetchWithTimeout(url)
     .then(e => {
       if (e.status === 200) {
-        return e.text().then(str => {
-          const reg = /(\w+)\s?=\s?(\[[\s\S]+?\n\s+\]),/g
-          let res = reg.exec(str)
-          let download_url_us: string[][] = [],
-            download_url: string[][] = [],
-            raw_url: string[][] = []
-          while (res) {
-            // console.log(res)
-            switch (res[1]) {
-              case 'download_url_us':
-                download_url_us = eval(res[2].replaceAll('&#10;', '\n'))
-                break
-              case 'download_url':
-                download_url = eval(res[2].replaceAll('&#10;', '\\n'))
-                break
-              case 'raw_url':
-                raw_url = eval(res[2].replaceAll('&#10;', '\\n'))
-                raw_url.shift()
-                break
-              default:
-                break
-            }
-            res = reg.exec(str)
+        const reg = /(\w+)\s?=\s?(\[[\s\S]+?\n\s+\]),/g
+        let res = reg.exec(e.str)
+        let download_url_us: string[][] = [],
+          download_url: string[][] = [],
+          raw_url: string[][] = []
+        while (res) {
+          // console.log(res)
+          switch (res[1]) {
+            case 'download_url_us':
+              download_url_us = eval(res[2].replaceAll('&#10;', '\n'))
+              break
+            case 'download_url':
+              download_url = eval(res[2].replaceAll('&#10;', '\\n'))
+              break
+            case 'raw_url':
+              raw_url = eval(res[2].replaceAll('&#10;', '\\n'))
+              raw_url.shift()
+              break
+            default:
+              break
           }
-          return {
-            download_url_us,
-            download_url,
-            raw_url
-          }
-        })
+          res = reg.exec(e.str)
+        }
+        return {
+          download_url_us,
+          download_url,
+          raw_url
+        }
       } else {
         throw new Error(`Fetch mirror failed: ${e.statusText}`)
       }
@@ -119,10 +115,33 @@ export function localFetch(path: string, plugin = 'list-viewer') {
   return fetch(`local:///${LiteLoader.plugins[plugin].path.plugin.replace(':\\', '://').replaceAll('\\', '/')}/${path.startsWith('/') ? path.slice(1) : path}`)
 }
 
-export function fetchWithTimeout(url: string, options?: RequestInit, timeout = 3e3): Promise<Response> {
+export function fetchWithTimeout(
+  url: string,
+  options?: RequestInit,
+  timeout = 3e3
+): Promise<{
+  data: ArrayBuffer
+  str: string
+  status?: number
+  statusText?: string
+  url?: string
+}> {
   url = getRedirectedGitHubUrl(url) || url
   config.debug && console.log('fetchWithTimeout', url)
-
+  if (config.proxy.enabled) {
+    return ListViewer.request(url, {
+      timeout,
+      headers: options?.headers as Record<string, string> | undefined,
+      body: options?.body,
+      method: options?.method as 'GET' | 'POST' | undefined
+    }).then(res => {
+      if (res.success) {
+        return res.data
+      } else {
+        throw new Error(res.message)
+      }
+    })
+  }
   return new Promise((resolve, reject) => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
@@ -131,9 +150,16 @@ export function fetchWithTimeout(url: string, options?: RequestInit, timeout = 3
     }, timeout)
 
     fetch(url, { ...options, signal: controller.signal })
-      .then(response => {
+      .then(async response => {
         clearTimeout(timeoutId)
-        resolve(response)
+        const ab = await response.arrayBuffer()
+        resolve({
+          data: ab,
+          str: new TextDecoder().decode(ab),
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url
+        })
       })
       .catch(error => {
         clearTimeout(timeoutId)
@@ -170,6 +196,20 @@ export function deepWatch<T extends object>(obj: T, callback: () => void): T {
       return Reflect.set(target, key, value, receiver)
     }
   })
+
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      if (typeof obj[i] === 'object' && obj[i] !== null) {
+        obj[i] = deepWatch(obj[i], callback)
+      }
+    }
+  } else {
+    for (const key in obj) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        obj[key] = deepWatch(obj[key], callback)
+      }
+    }
+  }
 
   return observer
 }
