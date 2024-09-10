@@ -3,7 +3,7 @@ import type { GlobalMethods, HandleResult, Config } from '../global'
 import fs from 'fs'
 import path from 'path'
 import StreamZip from 'node-stream-zip'
-import { request } from './utils'
+import { output, request } from './utils'
 import { ProxyAgent } from 'proxy-agent'
 
 const thisSlug = 'list-viewer'
@@ -101,10 +101,6 @@ handle('request', async (_, url, opt): Promise<HandleResult> => {
     }
   }
 })
-
-function output(...args: any[]) {
-  console.log('\x1b[32m[ListViewer]\x1b[0m', ...args)
-}
 
 async function installPlugin(cache_file_path: string, slug: string): Promise<HandleResult> {
   const { plugins } = LiteLoader.path

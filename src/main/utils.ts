@@ -1,12 +1,15 @@
 import http from 'http'
 import https from 'https'
 import { URL } from 'url'
+import fs from 'fs'
+import path from 'path'
 
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { HttpProxyAgent } from 'http-proxy-agent'
 import { SocksProxyAgent } from 'socks-proxy-agent'
-import type { RequestOptions } from '../global'
+import type { Config, RequestOptions } from '../global'
 
+const thisSlug = 'list-viewer'
 export function request(
   url: string,
   options: RequestOptions = {}
@@ -66,13 +69,15 @@ export function request(
       res.on('data', chunk => chunks.push(chunk))
       res.on('end', () => {
         const data = Buffer.concat(chunks)
-        resolve({
+        const obj = {
           data: data,
           str: data.toString('utf-8'),
           status: res.statusCode,
           statusText: res.statusMessage,
           url: res.url
-        })
+        }
+        output(obj)
+        resolve(obj)
       })
     })
 
@@ -85,4 +90,31 @@ export function request(
 
     req.end() // 完成请求
   })
+}
+
+export function output(...args: any[]) {
+  try {
+    if ((LiteLoader.api.config.get<Config>(thisSlug) as Config).debug) {
+      fs.appendFileSync(
+        path.join(LiteLoader.plugins[thisSlug].path.data, 'debug.log'),
+        `[${new Date().toLocaleString()}] ${args
+          .map(e =>
+            JSON.stringify(
+              e,
+              (key, value) => {
+                if (typeof value === 'bigint') return value.toString()
+                else if (value?.type === 'Buffer' && Array.isArray(value.data)) return `Buffer<${value?.data?.length}>`
+                return value
+              },
+              2
+            )
+          )
+          .join(' ')}\n`
+      )
+    }
+  } catch (error) {
+    console.warn('\x1b[32m[ListViewer]\x1b[0m', '输出到日志文件失败', error)
+  }
+
+  console.log('\x1b[32m[ListViewer]\x1b[0m', ...args)
 }
