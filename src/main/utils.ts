@@ -22,6 +22,17 @@ export function request(
     const protocol = urlObj.protocol === 'https:' ? https : http
 
     const isPost = options.method === 'POST'
+    const headers = {
+      ...(isPost && options.body ? { 'Content-Length': Buffer.byteLength(typeof options.body === 'object' ? JSON.stringify(options.body) : options.body), 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {})
+    }
+    if (
+      !Object.keys(headers)
+        .map(e => e.toLowerCase())
+        .includes('user-agent')
+    ) {
+      headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0'
+    }
     const requestOptions: http.RequestOptions | https.RequestOptions = {
       host: urlObj.host,
       port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
@@ -30,10 +41,7 @@ export function request(
       hostname: urlObj.hostname,
       timeout: options.timeout || 3e4,
       method: options.method || 'GET',
-      headers: {
-        ...(isPost && options.body ? { 'Content-Length': Buffer.byteLength(typeof options.body === 'object' ? JSON.stringify(options.body) : options.body), 'Content-Type': 'application/json' } : {}),
-        ...(options.headers || {})
-      },
+      headers,
       agent: options.proxy
         ? options.proxy.startsWith('socks')
           ? new SocksProxyAgent(options.proxy)
