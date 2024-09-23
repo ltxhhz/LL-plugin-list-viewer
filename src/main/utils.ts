@@ -101,7 +101,7 @@ export function output(...args: any[]) {
           .map(e =>
             JSON.stringify(
               e,
-              (key, value) => {
+              (_key, value) => {
                 if (typeof value === 'bigint') return value.toString()
                 else if (value?.type === 'Buffer' && Array.isArray(value.data)) return `Buffer<${value?.data?.length}>`
                 return value

@@ -149,6 +149,7 @@ export function onSettingWindowCreated(view: HTMLElement) {
         let dialogInput: HTMLInputElement | HTMLTextAreaElement
         dialogTitle.innerText = option.title
         config.debug && console.log('showDialog', JSON.parse(JSON.stringify(option)))
+        dialogCancel.style.removeProperty('display')
         if (option.type === 'confirm' || option.type === 'message') {
           dialogContent.innerText = option.message || ''
           if (option.content) {
@@ -160,8 +161,6 @@ export function onSettingWindowCreated(view: HTMLElement) {
           }
           if (option.type === 'message') {
             dialogCancel.style.display = 'none'
-          } else {
-            dialogCancel.style.removeProperty('display')
           }
         } else if (option.type === 'prompt') {
           dialogInput = option.textarea ? document.createElement('textarea') : document.createElement('input')
@@ -224,8 +223,7 @@ jsdelivr镜像直接按默认那个写就行
         const isActive = proxySwitch.hasAttribute('is-active')
         proxySwitch.toggleAttribute('is-active', !isActive)
         config.proxy.enabled = !isActive
-        console.log(isActive);
-        
+        console.log(isActive)
       }
       const proxySetBtn = doms.querySelector<HTMLButtonElement>('.proxy-set-btn')!
       proxySetBtn.onclick = () => {
@@ -251,7 +249,7 @@ jsdelivr镜像直接按默认那个写就行
 前往 https://github.com/settings/tokens 获取，scope 选择 repo > public_repo`,
           default: config.githubToken
         }).then(res => {
-          if (res) {
+          if (typeof res === 'string') {
             config.githubToken = res
           }
         })
