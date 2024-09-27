@@ -1,61 +1,45 @@
-name: 需求建议
-description: 提出针对本项目的想法和建议
-title: '[Feature]'
-labels:
-  - enhancement
-assignees: ltxhhz
+name: 功能请求
+description: 请求开发者增加功能。
+title: "[Feat]: "
+labels: ["enhancement"]
+assignees:
+  - ltxhhz
 body:
   - type: markdown
     attributes:
       value: |
-        **提交 issue 前请先[搜索查看其他 issue](https://github.com/ltxhhz/LL-plugin-list-viewer/issues)，避免重复提交**
+        # 感谢您愿意花费时间来提出issue。
+        我们很高兴您能为本插件提供您宝贵的想法与意见。
   - type: markdown
     attributes:
       value: |
-        ## 环境信息
-  - type: input
-    id: qqnt-version
-    validations:
-      required: true
+        ## 在此之前,请您确认:
+        - 没有相同的issue已被提出。
+        - 您会准确、真实的填写下方内容。
+        - 您了解[提问的智慧](https://github.com/tvvocold/How-To-Ask-Questions-The-Smart-Way)所讲述的内容。
+  - type: checkboxes
     attributes:
-      label: QQNT 版本
-      description: 在设置中LiteLoader分页里查看
-  - type: input
-    id: ll-version
-    validations:
-       required: true
-    attributes:
-      label: LiteLoader 版本
-      description: 在设置中LiteLoader分页里查看
+      label: 请确保您已阅读以上注意事项，并勾选下方的确认框。
+      options:
+        - label: 我已经在[Issue Tracker](https://github.com/ltxhhz/LL-plugin-list-viewer/issues)中找过我要提出的功能请求，没有找到相同请求的issue。
+          required: true
+        - label: 我已知晓,如果我不真实填写issue,则我的issue可能会被无条件关闭&锁定&删除。
+          required: true
   - type: textarea
-    id: versions
     attributes:
-      label: 版本信息
-      description: 把设置中LiteLoader分页里最上方的版本信息截图粘贴到这里
-    validations:
-       required: true
-  - type: input
-    id: version
-    validations:
-      required: true
-    attributes:
-      label: list-viewer 插件版本
-      description: 在设置中LiteLoader分页里查看
-  - type: markdown
-    attributes:
-      value: '## 详细信息'
-  - type: textarea
-    id: description
-    attributes:
-      label: 请描述您的需求或者改进建议
+      label: 请求增加的功能
+      description: 请描述的详细一点,以便开发者快速理解。
     validations:
       required: true
   - type: textarea
-    id: solution
     attributes:
-      label: 请描述你建议的实现方案
+      label: 功能实现的解决方案
+      description: 请描述的详细一点,以便开发者快速理解。
+    validations:
+      required: false
   - type: textarea
-    id: additional-information
+    id: other
     attributes:
-      label: 附加信息
-      description: 如果你还有其他需要提供的信息，可以在这里填写（截图、视频等）
+      label: 其它信息
+    validations:
+      required: false
