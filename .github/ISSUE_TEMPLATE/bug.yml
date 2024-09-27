@@ -1,7 +1,7 @@
 name: BUG 提交
 description: 插件不正常的情况
 title: '[Bug]'
-label:
+labels:
   - bug
 assignees: ltxhhz
 body:
@@ -14,12 +14,12 @@ body:
       value: |
         ## 环境信息
   - type: input
-    id: qq-version
-    validations:
-       required: true
+    id: qqnt-version
     attributes:
       label: QQNT 版本
       description: 在设置中LiteLoader分页里查看
+    validations:
+       required: true
   - type: input
     id: ll-version
     validations:
