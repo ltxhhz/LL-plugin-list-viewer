@@ -1,31 +1,29 @@
 name: 需求建议
 description: 提出针对本项目的想法和建议
-title: '[feature]'
+title: '[Feature]'
 labels:
   - enhancement
-# assignees: ltxhhz
+assignees: ltxhhz
 body:
   - type: markdown
     attributes:
       value: |
-        **提交 issue 前请先搜索查看其他 issue，避免重复提交**
+        **提交 issue 前请先[搜索查看其他 issue](https://github.com/ltxhhz/LL-plugin-list-viewer/issues)，避免重复提交**
   - type: markdown
     attributes:
       value: |
         ## 环境信息
-        填写版本信息或者提供版本的截图
-        **不提供会被关闭**
   - type: input
-    id: qq-version
-    # validations:
-    #   required: true
+    id: qqnt-version
+    validations:
+      required: true
     attributes:
-      label: qq版本
+      label: QQNT 版本
       description: 在设置中LiteLoader分页里查看
   - type: input
     id: ll-version
-    # validations:
-    #   required: true
+    validations:
+       required: true
     attributes:
       label: LiteLoader 版本
       description: 在设置中LiteLoader分页里查看
@@ -34,6 +32,8 @@ body:
     attributes:
       label: 版本信息
       description: 把设置中LiteLoader分页里最上方的版本信息截图粘贴到这里
+    validations:
+       required: true
   - type: input
     id: version
     validations:
@@ -41,15 +41,6 @@ body:
     attributes:
       label: list-viewer 插件版本
       description: 在设置中LiteLoader分页里查看
-  - type: dropdown
-    id: LL-is-release
-    validations:
-      required: true
-    attributes:
-      label: LiteLoader 是否为发布版本(release)
-      options:
-        - 是
-        - 否
   - type: markdown
     attributes:
       value: '## 详细信息'
