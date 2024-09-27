@@ -1,7 +1,7 @@
 name: BUG 提交
 description: 插件不正常的情况
-title: "[Bug]"
-labels:
+title: '[Bug]'
+label:
   - bug
 assignees: ltxhhz
 body:
