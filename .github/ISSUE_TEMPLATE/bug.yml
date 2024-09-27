@@ -1,39 +1,44 @@
 name: BUG 提交
 description: 插件不正常的情况
-# title: "[bug] 这里自己填"
+title: "[Bug]"
 labels:
   - bug
-# assignees: ltxhhz
+assignees: ltxhhz
 body:
   - type: markdown
     attributes:
       value: |
-        **提交 issue 前请先搜索查看其他 issue，避免重复提交**
+        **提交 issue 前请先[搜索查看其他 issue](https://github.com/ltxhhz/LL-plugin-list-viewer/issues)，避免重复提交**
   - type: markdown
     attributes:
       value: |
         ## 环境信息
-        填写版本信息或者提供版本的截图
-        **不提供会被关闭**
   - type: input
     id: qq-version
-    # validations:
-    #   required: true
+    validations:
+       required: true
     attributes:
-      label: qq版本
+      label: QQNT 版本
       description: 在设置中LiteLoader分页里查看
   - type: input
     id: ll-version
-    # validations:
-    #   required: true
+    validations:
+       required: true
     attributes:
       label: LiteLoader 版本
       description: 在设置中LiteLoader分页里查看
+  - type: checkboxes
+    id: LL-is-Dev
+    attributes:
+      label: LiteLoader 是否为开发版
+      description: LiteLoader是否通过`git clone`下载安装,发行版(Release)请勿勾选
   - type: textarea
     id: versions
     attributes:
       label: 版本信息
       description: 把设置中LiteLoader分页里最上方的版本信息截图粘贴到这里
+    validations:
+       required: true
   - type: input
     id: version
     validations:
@@ -41,15 +46,6 @@ body:
     attributes:
       label: list-viewer 插件版本
       description: 在设置中LiteLoader分页里查看
-  - type: dropdown
-    id: LL-is-release
-    validations:
-      required: true
-    attributes:
-      label: LiteLoader 是否为发布版本(release)
-      options:
-        - 是
-        - 否
   - type: input
     id: platform
     validations:
@@ -82,7 +78,9 @@ body:
     id: logs
     attributes:
       label: 相关日志输出
-      description: 请复制并粘贴任何相关的日志输出（如果你会打开控制台或终端）。 这将自动格式化为代码，因此无需反引号
+      description: |
+        请复制并粘贴任何相关的日志输出（如果你会打开控制台或终端）<br>
+        这将自动格式化为代码，因此无需反引号
       render: shell
   - type: textarea
     id: additional-information
