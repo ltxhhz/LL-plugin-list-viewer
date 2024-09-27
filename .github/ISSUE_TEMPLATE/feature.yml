@@ -42,12 +42,12 @@ body:
     attributes:
       label: LiteLoader是否为开发版本
       description: LiteLoader是否是通过`git clone`命令下载安装的?如果不是,请勿勾选。
+    options:
+      - label: 这是开发版本
   - type: textarea
     attributes:
       label: Electron&Chromium&Node.js版本
       description: LiteLoader分页中的版本。<br>为了方便,请直接贴版本截图。
-    options:
-       - label: 这是开发版本
     validations:
       required: true
   - type: input
