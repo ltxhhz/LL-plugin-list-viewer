@@ -16,7 +16,6 @@ body:
         ## 在此之前,请您确认:
         - 没有相同的issue已被提出。
         - 您会准确、真实的填写下方内容。
-        - 您了解[提问的智慧](https://github.com/tvvocold/How-To-Ask-Questions-The-Smart-Way)所讲述的内容。
   - type: checkboxes
     attributes:
       label: 请确保您已阅读以上注意事项，并勾选下方的确认框。
@@ -25,6 +24,39 @@ body:
           required: true
         - label: 我已知晓,如果我不真实填写issue,则我的issue可能会被无条件关闭&锁定&删除。
           required: true
+  - type: input
+    attributes:
+      label: QQNT版本
+      description: 左下角菜单中关于选项中的版本/LiteLoader分页中的QQNT版本。
+      placeholder: 9.9.x-xxxxx
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: LiteLoader版本
+      description: LiteLoader分页中的LiteLoader版本。
+      placeholder: 1.x.x
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: LiteLoader是否为开发版本
+      description: LiteLoader是否是通过`git clone`命令下载安装的?如果不是,请勿勾选。
+  - type: textarea
+    attributes:
+      label: Electron&Chromium&Node.js版本
+      description: LiteLoader分页中的版本。<br>为了方便,请直接贴版本截图。
+    options:
+       - label: 这是开发版本
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 本插件版本
+      description: list-viewer插件分页中的插件版本。
+      placeholder: 1.x.x
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: 请求增加的功能
