@@ -436,7 +436,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                   }
                   config.inactivePlugins.push(this.manifest!.slug)
                   this.updateOpenDirEvent()
-                } else {
+                } else if (res.message) {
                   showDialog({ title: '安装失败', message: res.message, type: 'message' })
                 }
               })
