@@ -38,10 +38,6 @@ export async function initConfig() {
   config = deepWatch(config, () => {
     save(config)
   })
-
-  setInterval(() => {
-    console.log(config instanceof Proxy)
-  }, 2e3)
 }
 export function getDynamicMirror() {
   const m = getRandomItem(originMirrors)
