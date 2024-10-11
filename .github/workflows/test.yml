@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          echo "PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))">>$GITHUB_ENV
+          echo "CURR_TAG=$(git describe --abbrev=0 --tags)">>$GITHUB_ENV
+
+      - name: Generate changelog
+        id: generate_changelog
+        run: |
+          echo "Previous tag: $PREV_TAG"
+          echo "Last tag: $LAST_TAG"
+          FULL_CHANGELOG="**Full Changelog**: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/$PREV_TAG...$CURR_TAG"
+          COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s (%an, %ar)")
+          {
+            echo 'changelog<<EOF'
+            echo -e "$COMMITS\n$FULL_CHANGELOG"
+            echo EOF
+          } >> $GITHUB_ENV
+
+      - run: echo $changelog
