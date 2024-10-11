@@ -4,11 +4,14 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
+    permissions:
+      actions: write
+      contents: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v4.2.1
