@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - "*"
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,29 @@ jobs:
       contents: write
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4.2.1
+      uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+        fetch-depth: 0
+      
+    - name: Get previous tag
+      id: get_previous_tag
+      run: |
+        echo "PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))">>$GITHUB_ENV
+        echo "CURR_TAG=$(git describe --abbrev=0 --tags)">>$GITHUB_ENV
+
+    - name: Generate changelog
+      id: generate_changelog
+      run: |
+        echo "Previous tag: $PREV_TAG"
+        echo "Current tag: $CURR_TAG"
+        FULL_CHANGELOG="**Full Changelog**: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/$PREV_TAG...$CURR_TAG"
+        COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s (%an, %ar)")
+        {
+          echo 'changelog<<EOF'
+          echo -e "$COMMITS\n\n$FULL_CHANGELOG"
+          echo EOF
+        } >> $GITHUB_OUTPUT
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -32,6 +54,7 @@ jobs:
       with:
         artifacts: ./list-viewer.zip
         # bodyFile: "body.md"
-        generateReleaseNotes: true
+        # generateReleaseNotes: true
+        body: ${{ steps.generate_changelog.outputs.changelog }}
         makeLatest: latest
         token: ${{ secrets.GITHUB_TOKEN }}

@@ -23,12 +23,12 @@ jobs:
         id: generate_changelog
         run: |
           echo "Previous tag: $PREV_TAG"
-          echo "Last tag: $LAST_TAG"
+          echo "Current tag: $CURR_TAG"
           FULL_CHANGELOG="**Full Changelog**: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/$PREV_TAG...$CURR_TAG"
           COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%h %s (%an, %ar)")
           {
             echo 'changelog<<EOF'
-            echo -e "$COMMITS\n$FULL_CHANGELOG"
+            echo -e "$COMMITS\n\n$FULL_CHANGELOG"
             echo EOF
           } >> $GITHUB_ENV
 
