@@ -1,0 +1,34 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.1
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18' # 或你项目的 Node.js 版本
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: publish release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: ./list-viewer.zip
+        # bodyFile: "body.md"
+        generateReleaseNotes: true
+        makeLatest: latest
+        token: ${{ secrets.GITHUB_TOKEN }}
