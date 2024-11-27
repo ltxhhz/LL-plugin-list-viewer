@@ -666,7 +666,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     }
   }
   customElements.define('plugin-item', PluginListClass)
-  return new PluginListClass()
+  return {} as InstanceType<typeof PluginListClass>
 }
 
 function updateElProp(el: PluginItemElement, manifest: Manifest | null | 404, repo: string) {
