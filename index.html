@@ -32,8 +32,9 @@
   <body class="p-2">
     <div class="bg-white rounded-lg shadow-md p-4 mb-4">
       <div class="flex flex-col mb-2">
-        <div class="text-2xl text-gray-700 font-semibold"><a class="underline hover:text-blue-600" href="https://github.com/ltxhhz/LL-plugin-list-viewer" target="_blank">List-Viewer</a>插件数据自动更新状态
-        <img class="inline-block" src="https://github.com/ltxhhz/LL-plugin-list-viewer/actions/workflows/update-info.yml/badge.svg" alt="Actions Status">
+        <div class="text-2xl text-gray-700 font-semibold">
+          <a class="underline hover:text-blue-600" href="https://github.com/ltxhhz/LL-plugin-list-viewer" target="_blank">List-Viewer</a>插件数据自动更新状态
+          <img class="inline-block" src="https://github.com/ltxhhz/LL-plugin-list-viewer/actions/workflows/update-info.yml/badge.svg" alt="Actions Status" />
         </div>
         <div>列表来源: <a class="underline hover:text-blue-500 duration-300" href="https://github.com/LiteLoaderQQNT/Plugin-List/">Plugin-List</a></div>
         <div id="meta">
@@ -80,17 +81,19 @@
         /**@type {HTMLDivElement}*/
         const clone = templateEl.cloneNode(true)
         clone.innerHTML = clone.innerHTML
-          .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest.name}</a>`)
-          .replace('#版本', manifest.version)
-          .replace('#说明', manifest.description)
+          .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest?.name ?? repo}</a>`)
+          .replace('#版本', manifest?.version ?? '获取失败')
+          .replace('#说明', manifest?.description ?? '获取失败')
           .replace(
             '#作者',
-            manifest.authors
-              .map(
-                author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
+            manifest
+              ? manifest.authors
+                  .map(
+                    author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
           href="${author.link}">${author.name}</a>`
-              )
-              .join(' | ')
+                  )
+                  .join(' | ')
+              : ''
           )
           .replace('#图标', defaultIcon)
           .replace('#类型', typeMap[manifest.type])
@@ -111,7 +114,11 @@
       fetch('./all-manifest.json')
         .then(res => res.json())
         .then(data => {
-          listEl.replaceChildren(...Object.entries(data).map(([repo, manifest]) => useTemplate(repo, manifest)))
+          listEl.replaceChildren(
+            ...Object.entries(data)
+              // .filter(([repo, manifest]) => manifest)
+              .map(e => useTemplate(...e))
+          )
           fetchIcons.then(data => {
             for (const key in data) {
               const item = data[key]
