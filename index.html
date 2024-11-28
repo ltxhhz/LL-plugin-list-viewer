@@ -80,25 +80,29 @@
       const useTemplate = (repo, manifest) => {
         /**@type {HTMLDivElement}*/
         const clone = templateEl.cloneNode(true)
-        clone.innerHTML = clone.innerHTML
-          .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest?.name ?? repo}</a>`)
-          .replace('#版本', manifest?.version ?? '获取失败')
-          .replace('#说明', manifest?.description ?? '获取失败')
-          .replace(
-            '#作者',
-            manifest
-              ? manifest.authors
-                  .map(
-                    author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
+        if (manifest) {
+          clone.innerHTML = clone.innerHTML
+            .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest?.name}</a>`)
+            .replace('#版本', manifest.version)
+            .replace('#说明', manifest.description)
+            .replace(
+              '#作者',
+              manifest.authors
+                .map(
+                  author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
           href="${author.link}">${author.name}</a>`
-                  )
-                  .join(' | ')
-              : ''
-          )
-          .replace('#图标', defaultIcon)
-          .replace('#类型', typeMap[manifest.type])
-          .replace('#平台', manifest.platform.join(' | '))
-        clone.dataset.slug = manifest.slug
+                )
+                .join(' | ')
+            )
+            .replace('#图标', defaultIcon)
+            .replace('#类型', typeMap[manifest.type])
+            .replace('#平台', manifest.platform.join(' | '))
+          clone.dataset.slug = manifest.slug
+        } else {
+          clone.innerHTML = clone.innerHTML
+            .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${repo}</a>`)
+            .replace('#说明', '获取失败')
+        }
         return clone
       }
       fetch('./meta.json')
