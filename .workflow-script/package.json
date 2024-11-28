@@ -1,0 +1,21 @@
+{
+  "name": "script",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --experimental-modules index.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/superagent": "^8.1.9"
+  },
+  "dependencies": {
+    "https-proxy-agent": "^7.0.5",
+    "p-limit": "^6.1.0",
+    "superagent": "^10.1.1"
+  },
+  "packageManager": "pnpm@9.14.2"
+}
