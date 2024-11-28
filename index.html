@@ -88,11 +88,13 @@
             .replace(
               '#作者',
               manifest.authors
-                .map(
-                  author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
+                ? manifest.authors
+                    .map(
+                      author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
           href="${author.link}">${author.name}</a>`
-                )
-                .join(' | ')
+                    )
+                    .join(' | ')
+                : '使用authors字段添加作者信息'
             )
             .replace('#图标', defaultIcon)
             .replace('#类型', typeMap[manifest.type])
