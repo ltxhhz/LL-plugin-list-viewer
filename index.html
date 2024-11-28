@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      Date.prototype.format = function (fmt = 'yyyy-MM-dd hh:mm:ss') {
+        const o = {
+          'M+': this.getMonth() + 1, //月份
+          'd+': this.getDate(), //日
+          'h+': this.getHours(), //小时
+          'm+': this.getMinutes(), //分
+          's+': this.getSeconds(), //秒
+          'q+': Math.floor((this.getMonth() + 3) / 3), //季度
+          S: this.getMilliseconds() //毫秒
+        }
+        const year = /(y+)/.exec(fmt)
+        if (year) fmt = fmt.replace(year[1], (this.getFullYear() + '').substring(4 - year[1].length))
+        for (let k in o) {
+          const a = new RegExp('(' + k + ')').exec(fmt)
+          if (a) {
+            fmt = fmt.replace(a[1], a[1].length == 1 ? o[k] : ('00' + o[k]).substring(o[k].toString().length))
+          }
+        }
+        return fmt
+      }
+    </script>
+  </head>
+
+  <body class="p-2">
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <div class="flex flex-col mb-2">
+        <div class="text-2xl text-gray-700 font-semibold"><a class="underline hover:text-blue-600" href="https://github.com/ltxhhz/LL-plugin-list-viewer" target="_blank">List-Viewer</a>插件数据自动更新状态
+        <img class="inline-block" src="https://github.com/ltxhhz/LL-plugin-list-viewer/actions/workflows/update-info.yml/badge.svg" alt="Actions Status">
+        </div>
+        <div>列表来源: <a class="underline hover:text-blue-500 duration-300" href="https://github.com/LiteLoaderQQNT/Plugin-List/">Plugin-List</a></div>
+        <div id="meta">
+          <span><span class="font-bold">更新时间：</span>#更新时间</span>
+          <span><span class="font-bold">插件总数：</span>#插件总数</span>
+          <span><span class="font-bold">获取成功：</span>#获取成功</span>
+          <span><span class="font-bold">获取失败：</span>#获取失败</span>
+        </div>
+      </div>
+    </div>
+    <div id="list" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+        <div class="flex flex-col">
+          <div class="flex min-h-[70px]">
+            <div class="flex-shrink-0 mr-3 flex items-center justify-center">
+              <img class="h-12 w-12 icon" src="#图标" alt="插件图标" />
+            </div>
+            <div class="flex flex-col">
+              <div class="text-xl">#标题</div>
+              <div class="text-sm text-gray-500">#说明</div>
+            </div>
+          </div>
+          <div class="flex justify-between items-center gap-x-4 text-lg flex-wrap">
+            <span class="text-gray-400 whitespace-nowrap">版本：#版本</span>
+            <span class="text-gray-400 whitespace-nowrap">作者：#作者</span>
+            <span class="text-gray-400 whitespace-nowrap">类型：#类型</span>
+            <span class="text-gray-400 whitespace-nowrap">平台：#平台</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const defaultIcon = 'https://raw.githubusercontent.com/LiteLoaderQQNT/LiteLoaderQQNT/refs/heads/main/src/settings/static/default.png'
+      const typeMap = {
+        extension: '扩展',
+        theme: '主题',
+        framework: '框架'
+      }
+      const listEl = document.getElementById('list')
+      const metaEl = document.getElementById('meta')
+      const templateEl = listEl.children[0]
+      templateEl.remove()
+      const useTemplate = (repo, manifest) => {
+        /**@type {HTMLDivElement}*/
+        const clone = templateEl.cloneNode(true)
+        clone.innerHTML = clone.innerHTML
+          .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest.name}</a>`)
+          .replace('#版本', manifest.version)
+          .replace('#说明', manifest.description)
+          .replace(
+            '#作者',
+            manifest.authors
+              .map(
+                author => `<a class="underline hover:text-blue-300 duration-300" target="_blank"
+          href="${author.link}">${author.name}</a>`
+              )
+              .join(' | ')
+          )
+          .replace('#图标', defaultIcon)
+          .replace('#类型', typeMap[manifest.type])
+          .replace('#平台', manifest.platform.join(' | '))
+        clone.dataset.slug = manifest.slug
+        return clone
+      }
+      fetch('./meta.json')
+        .then(res => res.json())
+        .then(res => {
+          metaEl.innerHTML = metaEl.innerHTML
+            .replace('#更新时间', new Date(res.time).format('yyyy-MM-dd hh:mm:ss'))
+            .replace('#插件总数', res.count.toString())
+            .replace('#获取成功', res.success.toString())
+            .replace('#获取失败', res.failed.toString())
+        })
+      const fetchIcons = fetch('./all-icons.json').then(res => res.json())
+      fetch('./all-manifest.json')
+        .then(res => res.json())
+        .then(data => {
+          listEl.replaceChildren(...Object.entries(data).map(([repo, manifest]) => useTemplate(repo, manifest)))
+          fetchIcons.then(data => {
+            for (const key in data) {
+              const item = data[key]
+              const icon = document.querySelector(`[data-slug="${key}"] .icon`)
+              if (icon) {
+                icon.src = item
+              }
+            }
+          })
+        })
+    </script>
+  </body>
+</html>
