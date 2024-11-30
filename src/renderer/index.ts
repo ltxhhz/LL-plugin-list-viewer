@@ -30,7 +30,9 @@ type DialogOptions = {
       placeholder?: string
     }
 )
-let listLoadingPromise: Promise<void[]>
+let listLoadingPromise: Promise<void | void[]>
+let listIconsPromise: Promise<void>
+let listIcons: Record<string, string>
 
 type PluginItemElement = ReturnType<typeof createItemComponent>
 
@@ -194,6 +196,11 @@ export function onSettingWindowCreated(view: HTMLElement) {
         const isActive = mirrorSwitch.hasAttribute('is-active')
         mirrorSwitch.toggleAttribute('is-active', !isActive)
         config.useMirror = !isActive
+        if (!isActive && githubIOBtn.hasAttribute('is-active')) {
+          githubIOBtn.click()
+          //   githubIOBtn.toggleAttribute('is-active', isActive)
+          //   config.useGithubIO = isActive
+        }
       }
       const mirrorAddBtn = doms.querySelector<HTMLButtonElement>('.mirror-add-btn')!
       mirrorAddBtn.onclick = () => {
@@ -217,13 +224,25 @@ jsdelivr镜像直接按默认那个写就行
           }
         })
       }
+      const githubIOBtn = doms.querySelector<HTMLInputElement>('.github-io-switch')!
+      githubIOBtn.toggleAttribute('is-active', config.useGithubIO)
+      githubIOBtn.onclick = () => {
+        const isActive = githubIOBtn.hasAttribute('is-active')
+        githubIOBtn.toggleAttribute('is-active', !isActive)
+        config.useGithubIO = !isActive
+        console.log(!isActive, mirrorSwitch.hasAttribute('is-active'))
+        if (!isActive && mirrorSwitch.hasAttribute('is-active')) {
+          mirrorSwitch.click()
+          //   mirrorSwitch.toggleAttribute('is-active', isActive)
+          //   config.proxy.enabled = isActive
+        }
+      }
       const proxySwitch = doms.querySelector<HTMLInputElement>('.proxy-switch')!
       proxySwitch.toggleAttribute('is-active', config.proxy.enabled)
       proxySwitch.onclick = () => {
         const isActive = proxySwitch.hasAttribute('is-active')
         proxySwitch.toggleAttribute('is-active', !isActive)
         config.proxy.enabled = !isActive
-        console.log(isActive)
       }
       const proxySetBtn = doms.querySelector<HTMLButtonElement>('.proxy-set-btn')!
       proxySetBtn.onclick = () => {
@@ -303,8 +322,45 @@ jsdelivr镜像直接按默认那个写就行
         if (!noCache && !isSameDay(config.listLastForceUpdate)) {
           noCache = true
         }
-        listLoadingPromise = getList(noCache)
-          .then(async list => {
+        if (config.useGithubIO) {
+          listLoadingPromise = getListGithubIO(noCache).then(async records => {
+            if (noCache) {
+              config.listLastForceUpdate = +new Date()
+            }
+            if (typeof records === 'string') {
+              showDialog({
+                title: '获取列表失败',
+                type: 'message',
+                message: records
+              })
+              return
+            }
+            listIconsPromise = getIconsGithubIO(noCache).then(icons => {
+              if (typeof icons === 'string') {
+                showDialog({
+                  title: '获取图标失败',
+                  type: 'message',
+                  message: icons
+                })
+                return
+              }
+              listIcons = icons
+            })
+            pluginList = records
+            totalEl.innerText = records.length.toString()
+            records.forEach((plugin, i) => {
+              const dom = document.createElement('plugin-item') as PluginItemElement
+              dom.dataset.name = plugin.repo
+              dom.dataset.description = plugin.branch
+              pluginListDom.appendChild(dom)
+              const manifest = plugin.manifest
+              dom.dataset.index = i + ''
+              config.debug && console.log(plugin, manifest)
+              updateElProp(dom, manifest, plugin.repo)
+            })
+          })
+        } else {
+          listLoadingPromise = getList(noCache).then(async list => {
             if (noCache) {
               config.listLastForceUpdate = +new Date()
             }
@@ -314,7 +370,7 @@ jsdelivr镜像直接按默认那个写就行
                 type: 'message',
                 message: list
               })
-              return []
+              return
             }
             pluginList = list
             totalEl.innerText = list.length.toString()
@@ -336,10 +392,11 @@ jsdelivr镜像直接按默认那个写就行
             })
             return Promise.all(promArr)
           })
-          .finally(() => {
-            refreshBtn.removeAttribute('is-disabled')
-            sortSelect.removeAttribute('is-disabled')
-          })
+        }
+        listLoadingPromise.finally(() => {
+          refreshBtn.removeAttribute('is-disabled')
+          sortSelect.removeAttribute('is-disabled')
+        })
       }
 
       refreshBtn.addEventListener('click', () => {
@@ -518,7 +575,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
     }
 
     attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null) {
-      config.debug && console.log('attributeChangedCallback', name, newValue)
+      config.debug && console.log('attributeChangedCallback', name, newValue ? newValue.slice(0, 100) : null)
       this.#initPromise.then(() => {
         try {
           switch (name) {
@@ -600,7 +657,12 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
               break
             }
             case 'data-icon': {
-              const [src, src1] = (newValue || '').split(',')
+              let src: string, src1: string
+              if (newValue?.startsWith?.('data:image')) {
+                src = newValue
+              } else {
+                ;[src, src1] = (newValue || '').split(',')
+              }
               this.iconEl!.src = src || defaultIcon
               let num = 0
               this.iconEl!.addEventListener('error', () => {
@@ -681,7 +743,14 @@ function updateElProp(el: PluginItemElement, manifest: Manifest | null | 404, re
     el.dataset.platforms = manifest.platform.join(' | ')
     el.dataset.installed = LiteLoader.plugins[manifest.slug] ? '1' : ''
     el.dataset.slug = manifest.slug
-    el.dataset.icon = getIconUrls(pluginList[Number(el.dataset.index)], manifest).toString()
+    const icon = getIconUrls(pluginList[Number(el.dataset.index)], manifest)
+    if (Array.isArray(icon)) {
+      el.dataset.icon = icon.toString()
+    } else {
+      icon.then(icon => {
+        el.dataset.icon = icon.toString()
+      })
+    }
     el.dataset.defaultIcon = defaultIcon
     el.dataset.type = manifest.type
     el.dataset.dependencies = manifest.dependencies?.length ? '1' : ''
@@ -713,14 +782,20 @@ async function getList(noCache = false, again = false): Promise<PluginList | str
   let url = ''
   if (config.useMirror) {
     const m = getGithubMirror(!again)
-    url = useMirror(`https://github.com/${listUrl.repo}/raw/${listUrl.branch}/${listUrl.file}`, m || getRandomItem(originMirrors), !!m)
+    url = useMirror(getRawUrl(listUrl, listUrl.file), m || getRandomItem(originMirrors), !!m)
   } else {
-    url = `https://github.com/${listUrl.repo}/raw/${listUrl.branch}/${listUrl.file}`
+    url = getRawUrl(listUrl, listUrl.file)
   }
   return await fetchWithTimeout(url, {
     cache: noCache ? 'no-cache' : 'default'
   })
-    .then(res => (res.status === 200 ? JSON.parse(res.str) : null))
+    .then(res => {
+      if (res.status === 200) {
+        return JSON.parse(res.str)
+      } else {
+        throw new Error(JSON.stringify(res))
+      }
+    })
     .catch(err => {
       if (again) {
         console.error(`getList ${url}`, err)
@@ -729,6 +804,24 @@ async function getList(noCache = false, again = false): Promise<PluginList | str
         console.warn(`getList ${url}`, err)
         return getList(noCache, true)
       }
+    })
+}
+
+async function getListGithubIO(noCache = false): Promise<Array<Plugin & { manifest: Manifest | null }> | string> {
+  const url = 'https://ltxhhz.github.io/LL-plugin-list-viewer/all-manifest.json'
+  return await fetchWithTimeout(url, {
+    cache: noCache ? 'no-cache' : 'default'
+  })
+    .then(res => {
+      if (res.status === 200) {
+        return JSON.parse(res.str)
+      } else {
+        throw new Error(JSON.stringify(res))
+      }
+    })
+    .catch(err => {
+      console.error(`getListGithubIO ${url}`, err)
+      return String(err)
     })
 }
 
@@ -764,9 +857,9 @@ async function getManifest(item: Plugin, noCache = false, again = false): Promis
 
   let m = getGithubMirror(!again)
   if (config.useMirror) {
-    url = useMirror(`https://github.com/${item.repo}/raw/${item.branch}/manifest.json`, m || getRandomItem(originMirrors), !!m)
+    url = useMirror(getRawUrl(item, 'manifest.json'), m || getRandomItem(originMirrors), !!m)
   } else {
-    url = `https://github.com/${item.repo}/raw/${item.branch}/manifest.json`
+    url = getRawUrl(item, 'manifest.json')
   }
   return await fetchWithTimeout(url, {
     cache: noCache ? 'no-cache' : 'default'
@@ -777,9 +870,9 @@ async function getManifest(item: Plugin, noCache = false, again = false): Promis
       } else {
         m = getGithubMirror(!again)
         if (config.useMirror) {
-          url = useMirror(`https://github.com/${item.repo}/raw/${item.branch}/package.json`, m || getRandomItem(originMirrors), !!m)
+          url = useMirror(getRawUrl(item, 'package.json'), m || getRandomItem(originMirrors), !!m)
         } else {
-          url = `https://github.com/${item.repo}/raw/${item.branch}/package.json`
+          url = getRawUrl(item, 'package.json')
         }
         return fetchWithTimeout(url, {
           cache: noCache ? 'no-cache' : 'default'
@@ -862,21 +955,37 @@ async function install(release = false): Promise<HandleResult> {
   }
 }
 
-function getIconUrls(item: Plugin, manifest: Manifest): [string?, string?] {
-  if (manifest.icon) {
+function getIconUrls(item: Plugin, manifest: Manifest): [string?, string?] | Promise<[string?]> {
+  if (config.useGithubIO && listIconsPromise) {
+    return listIconsPromise.then(() => [listIcons[manifest.slug]])
+  } else if (manifest.icon) {
     const iconPath = manifest.icon.replace(/^\.?\//, '')
     const m = getGithubMirror(true)
     const m1 = getGithubMirror()
     if (config.useMirror) {
-      return [
-        useMirror(`https://github.com/${item.repo}/raw/${item.branch}/${iconPath}`, m || getRandomItem(originMirrors), !!m),
-        useMirror(`https://github.com/${item.repo}/raw/${item.branch}/${iconPath}`, m1 || getRandomItem(originMirrors), !!m1)
-      ]
+      return [useMirror(getRawUrl(item, iconPath), m || getRandomItem(originMirrors), !!m), useMirror(getRawUrl(item, iconPath), m1 || getRandomItem(originMirrors), !!m1)]
     } else {
-      return [`https://github.com/${item.repo}/raw/${item.branch}/${iconPath}`]
+      return [getRawUrl(item, iconPath)]
     }
   }
   return []
+}
+
+async function getIconsGithubIO(noCache = false): Promise<Record<string, string> | string> {
+  return fetchWithTimeout('https://ltxhhz.github.io/LL-plugin-list-viewer/all-icons.json', {
+    cache: noCache ? 'no-cache' : 'default'
+  })
+    .then(res => {
+      if (res.status === 200) {
+        return JSON.parse(res.str)
+      } else {
+        throw new Error(JSON.stringify(res))
+      }
+    })
+    .catch(err => {
+      console.error(`getIconsGithubIO`, err)
+      return String(err)
+    })
 }
 
 function uninstall() {
@@ -889,6 +998,10 @@ function getGithubMirror(first = false): string | undefined {
     return config.mirrors.downloadUrl[0]
   }
   return getRandomItem(config.mirrors.downloadUrl.splice(1))
+}
+
+function getRawUrl(item: Plugin, file: string) {
+  return `https://github.com/${item.repo}/raw/refs/heads/${item.branch}/${file}`
 }
 
 function getArchiveUrl(item: Plugin) {

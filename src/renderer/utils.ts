@@ -13,10 +13,11 @@ export type SortType = 'default' | 'installed' | 'outdated'
 export let config: Config
 
 export async function initConfig() {
-  const defaultConfig = {
+  const defaultConfig:Config = {
     inactivePlugins: [],
     debug: false,
     useMirror: true,
+    useGithubIO: false,
     mirrors: {
       downloadUrl: ['https://cdn.jsdelivr.net/gh']
       // rawUrl: []
@@ -27,7 +28,7 @@ export async function initConfig() {
     proxy: {
       url: '',
       enabled: false
-    }
+    },
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
@@ -211,7 +212,7 @@ export function deepWatch<T extends object>(obj: T, callback: () => void): T {
 }
 
 export function getRedirectedGitHubUrl(url: string) {
-  const regex = /https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)/
+  const regex = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/refs\/heads\/([^/]+)\/(.+)/
   const match = url.match(regex)
 
   if (match) {

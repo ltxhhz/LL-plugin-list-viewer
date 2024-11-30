@@ -27,6 +27,7 @@ export interface Config {
     // rawUrl: string[]
   }
   useMirror: boolean
+  useGithubIO: boolean
   listSortType: SortType
   githubToken: string
   listLastForceUpdate: number

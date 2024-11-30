@@ -1,10 +1,10 @@
-<setting-section>
+<setting-section data-title="配置">
   <style>
-    [class^=list-dialog]::backdrop {
+    [class^='list-dialog']::backdrop {
       background: rgba(0, 0, 100, 0.4);
     }
 
-    [class^=list-dialog] button {
+    [class^='list-dialog'] button {
       cursor: pointer;
     }
 
@@ -32,7 +32,7 @@
       border-radius: 5px;
       width: 50%;
       background-color: var(--bg_white);
-      color: var(--text_primary)
+      color: var(--text_primary);
     }
 
     .list-dialog {
@@ -44,7 +44,7 @@
       border-radius: 5px;
       width: 50%;
       background-color: var(--background-04);
-      color: var(--text_primary)
+      color: var(--text_primary);
     }
 
     .list-dialog-content {
@@ -68,8 +68,7 @@
   <setting-panel>
     <setting-list data-direction="column">
       <setting-item>
-        <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号"
-          style="height: 25px; width: 100%; color: inherit" />
+        <input type="text" id="list-search" placeholder="过滤下方插件，支持插件名、描述、作者名、版本号" style="height: 25px; width: 100%; color: inherit" />
       </setting-item>
       <setting-item>
         <div>
@@ -87,13 +86,11 @@
       <setting-item data-direction="row">
         <div>
           <setting-text>
-            <span style="margin-right: 10px;">插件版本：<span class="version-text"></span></span>
-            <span style="margin-right: 10px;">插件总数：<span class="total-text"></span></span>
-            <span style="margin-right: 10px;"><a class="list-repo">列表仓库</a></span>
+            <span style="margin-right: 10px">插件版本：<span class="version-text"></span></span>
+            <span style="margin-right: 10px">插件总数：<span class="total-text"></span></span>
+            <span style="margin-right: 10px"><a class="list-repo">列表仓库</a></span>
           </setting-text>
-          <setting-text data-type="secondary">
-            刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新
-          </setting-text>
+          <setting-text data-type="secondary"> 刷新会禁用缓存并请求，所以会比较慢，可用来检查更新，建议不要频繁刷新 </setting-text>
         </div>
         <div>
           <setting-button data-type="primary" class="refresh-btn">刷新</setting-button>
@@ -101,21 +98,47 @@
       </setting-item>
       <setting-item data-direction="row">
         <div>
+          <setting-text>列表排序</setting-text>
+          <setting-text data-type="secondary">选择先后会影响排序</setting-text>
+        </div>
+        <div>
+          <setting-select class="sort-select">
+            <setting-option data-value="default">默认排序</setting-option>
+            <setting-option data-value="installed">已安装</setting-option>
+            <setting-option data-value="outdated">需要更新</setting-option>
+          </setting-select>
+        </div>
+      </setting-item>
+    </setting-list>
+  </setting-panel>
+  <setting-panel>
+    <setting-list data-title="列表获取配置" data-direction="column" is-collapsible>
+      <setting-item data-direction="row">
+        <div>
           <setting-text>是否使用镜像</setting-text>
           <setting-text data-type="secondary">使用代理时建议关闭</setting-text>
         </div>
         <div class="manipulate">
           <!-- <div>
-          不使用带缓存的镜像
-          <setting-switch class="mirror-no-cache"></setting-switch>
-        </div> -->
+            不使用带缓存的镜像
+            <setting-switch class="mirror-no-cache"></setting-switch>
+          </div> -->
           <setting-switch class="mirror-switch" is-active></setting-switch>
           <setting-button class="mirror-add-btn" data-type="secondary">修改镜像</setting-button>
           <!-- <setting-select class="mirror-select" style="width: 150px;">
-            <setting-option data-value="1" is-selected>不使用镜像</setting-option>
-            <setting-option data-value="2">2</setting-option>
-            <setting-option data-value="3">3</setting-option>
-          </setting-select> -->
+              <setting-option data-value="1" is-selected>不使用镜像</setting-option>
+              <setting-option data-value="2">2</setting-option>
+              <setting-option data-value="3">3</setting-option>
+            </setting-select> -->
+        </div>
+      </setting-item>
+      <setting-item data-direction="row">
+        <div>
+          <setting-text>是否使用github.io</setting-text>
+          <setting-text data-type="secondary">由<setting-link data-value="">Github Action定时任务</setting-link>自动更新的列表数据源，每两小时更新一次，使用github.io域名访问，可能会加快访问速度</setting-text>
+        </div>
+        <div class="manipulate">
+          <setting-switch class="github-io-switch"></setting-switch>
         </div>
       </setting-item>
       <setting-item data-direction="row">
@@ -135,19 +158,6 @@
         </div>
         <div>
           <setting-button class="githubtoken-set-btn" data-type="secondary">设置</setting-button>
-        </div>
-      </setting-item>
-      <setting-item data-direction="row">
-        <div>
-          <setting-text>列表排序</setting-text>
-          <setting-text data-type="secondary">选择先后会影响排序</setting-text>
-        </div>
-        <div>
-          <setting-select class="sort-select">
-            <setting-option data-value="default">默认排序</setting-option>
-            <setting-option data-value="installed">已安装</setting-option>
-            <setting-option data-value="outdated">需要更新</setting-option>
-          </setting-select>
         </div>
       </setting-item>
     </setting-list>
@@ -202,20 +212,19 @@
 <dialog class="list-dialog-install">
   <div style="font-size: large; display: flex; justify-content: space-between">
     选择包来源
-    <button class="list-dialog-install-btn-close q-button q-button--secondary default-btn"
-      style="width: 25px">×</button>
+    <button class="list-dialog-install-btn-close q-button q-button--secondary default-btn" style="width: 25px">×</button>
   </div>
   <hr />
-  <div style="color: orangered;margin-bottom: 10px;white-space: pre-wrap;">注意：
-    安装/更新 时会删除插件原文件（不包括配置），如果有修改过的文件，请先备份或者使用 git 进行安装/更新
-    一般插件都会使用 <strong>release</strong> 包进行更新，除非有特殊说明，如果不确定可以点击详情前往插件仓库进行查看
+  <div style="color: orangered; margin-bottom: 10px; white-space: pre-wrap">
+    注意： 安装/更新 时会删除插件原文件（不包括配置），如果有修改过的文件，请先备份或者使用 git 进行安装/更新 一般插件都会使用
+    <strong>release</strong> 包进行更新，除非有特殊说明，如果不确定可以点击详情前往插件仓库进行查看
   </div>
   <div style="display: flex; justify-content: space-around">
     <div style="display: flex; flex-direction: column; gap: 10px">
-      <setting-button class="list-dialog-btn-repo" data-type="secondary">使用仓库代码包</button>
+      <setting-button class="list-dialog-btn-repo" data-type="secondary">使用仓库代码包</setting-button>
     </div>
     <div style="display: flex; flex-direction: column; gap: 10px">
-      <setting-button class="list-dialog-btn-release" data-type="secondary">使用release包</button>
+      <setting-button class="list-dialog-btn-release" data-type="secondary">使用release包</setting-button>
     </div>
   </div>
 </dialog>
@@ -230,7 +239,7 @@
     <div>content</div>
   </div>
   <hr />
-  <div style="display: flex; justify-content: flex-end; gap: 20px;">
+  <div style="display: flex; justify-content: flex-end; gap: 20px">
     <setting-button class="list-dialog-btn-confirm" data-type="primary">确认</setting-button>
     <setting-button class="list-dialog-btn-cancel" data-type="secondary">取消</setting-button>
   </div>
