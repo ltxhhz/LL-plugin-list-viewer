@@ -121,9 +121,9 @@
         .then(res => res.json())
         .then(data => {
           listEl.replaceChildren(
-            ...Object.entries(data)
+            ...data
               // .filter(([repo, manifest]) => manifest)
-              .map(e => useTemplate(...e))
+              .map(e => useTemplate(e.repo, e.manifest))
           )
           fetchIcons.then(data => {
             for (const key in data) {
