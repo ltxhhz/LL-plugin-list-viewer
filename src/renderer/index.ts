@@ -1,7 +1,7 @@
 import { compare } from 'compare-versions'
 import pLimit from 'p-limit'
 import { HandleResult, Plugin, PluginList } from '../global'
-import { QCheck } from './components'
+import { QCheck, QInput } from './components'
 import { config, fetchWithTimeout, getRandomItem, localFetch, originMirrors, initConfig, useMirror, SortType, thisSlug, isSameDay } from './utils'
 
 const listUrl = {
@@ -190,6 +190,18 @@ export function onSettingWindowCreated(view: HTMLElement) {
           }
         })
       }
+      //#region
+      const timeoutInput = doms.querySelector<HTMLInputElement>('.timeout-input')!
+      const timeoutInput1 = new QInput({
+        type: 'number',
+        placeholder: '超时时间（ms）',
+        value: config.requestTimeout + ''
+      })
+      timeoutInput.appendChild(timeoutInput1.element)
+      timeoutInput1.inputEl.addEventListener('change', () => {
+        config.requestTimeout = Math.max(3e3, parseInt(timeoutInput1.inputEl.value))
+      })
+      //#endregion
       const mirrorSwitch = doms.querySelector<HTMLInputElement>('.mirror-switch')!
       mirrorSwitch.toggleAttribute('is-active', config.useMirror)
       mirrorSwitch.onclick = () => {

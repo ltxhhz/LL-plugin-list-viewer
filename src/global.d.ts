@@ -35,6 +35,7 @@ export interface Config {
     url: string
     enabled: boolean
   }
+  requestTimeout: number
 }
 
 export interface RequestOptions {

@@ -201,3 +201,52 @@ export class QCheck {
     }
   }
 }
+
+export class QInput {
+  prefixEL!: HTMLDivElement
+  inputEl!: HTMLInputElement
+  clearEl!: HTMLDivElement
+
+  element!: HTMLDivElement
+
+  constructor(options: {
+    name?: string
+    value?: string
+    type: 'text' | 'password' | 'number' | 'email' | 'tel' | 'url' | 'search' | 'date' | 'time' | 'datetime-local' | 'month' | 'week' | 'color' | 'file' | 'hidden' | 'reset' | 'submit' | 'button'
+    clearable?: boolean
+    placeholder?: string
+  }) {
+    this.element = document.createElement('div')
+    this.element.classList.add('q-input')
+    // this.prefixEL = document.createElement('div')
+    // this.prefixEL.classList.add('q-input__prefix')
+    this.clearEl = document.createElement('div')
+    this.clearEl.classList.add('q-input__clear')
+    this.clearEl.innerHTML = `<i class="q-svg-icon q-icon" role="button" bf-label-inner="true" tabindex="0" aria-label="清空" style="width: 16px; height: 16px; --340fd034: var(--icon_secondary);"><svg viewBox="0 0 24 24"><use xlink:href="/_upper_/resource/icons/close_24.svg#close_24"></use></svg></i>`
+    this.clearEl.style.display = 'none'
+
+    this.inputEl = document.createElement('input')
+    this.inputEl.spellcheck = false
+    this.inputEl.type = options.type
+    this.inputEl.name = options.name || ''
+    this.inputEl.value = options.value || ''
+    this.inputEl.placeholder = options.placeholder || ''
+    this.inputEl.classList.add('q-input__inner')
+
+    this.element.appendChild(this.inputEl)
+    if (options.clearable) {
+      this.inputEl.classList.add('q-input__clearable')
+      this.inputEl.addEventListener('input', () => {
+        if (this.inputEl.value) {
+          this.clearEl.style.display = 'flex'
+        } else {
+          this.clearEl.style.display = 'none'
+        }
+      })
+      this.clearEl.addEventListener('click', () => {
+        this.inputEl.value = ''
+      })
+      this.element.appendChild(this.clearEl)
+    }
+  }
+}

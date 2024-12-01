@@ -29,6 +29,7 @@ export async function initConfig() {
       url: '',
       enabled: false
     },
+    requestTimeout: 3e3
   }
   config = await (LiteLoader.api.config.get(thisSlug, defaultConfig) as PromiseLike<Config>)
   const save = debounce((obj: Config) => {
@@ -115,7 +116,7 @@ export function localFetch(path: string, plugin = 'list-viewer') {
 export function fetchWithTimeout(
   url: string,
   options?: RequestInit,
-  timeout = 3e3
+  timeout = config.requestTimeout
 ): Promise<{
   data: ArrayBuffer
   str: string
