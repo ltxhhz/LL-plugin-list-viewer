@@ -8,11 +8,11 @@
 > [!CAUTION]
 > **请不要在 QQ 官方群聊和任何影响力较大的简中互联网平台（包括但不限于: 哔哩哔哩，微博，知乎，抖音等）发布和讨论*任何*与本项目存在相关性的信息**
 
-| LiteLoader 安装脚本 | [Mzdyl/LiteLoaderQQNT_Install](https://github.com/Mzdyl/LiteLoaderQQNT_Install)                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 自动打包状态        | [![状态：release](https://github.com/ltxhhz/LL-plugin-list-viewer/actions/workflows/release.yml/badge.svg)](https://github.com/ltxhhz/LL-plugin-list-viewer/actions) |
-| 总下载量            | ![download](https://img.shields.io/github/downloads/ltxhhz/LL-plugin-list-viewer/total?logo=github)                                                                  |
-| 最新版本            | [![version](https://img.shields.io/github/v/release/ltxhhz/LL-plugin-list-viewer?logo=github)](https://github.com/ltxhhz/LL-plugin-list-viewer/releases)             |
+| LiteLoader 安装脚本 | [Mzdyl/LiteLoaderQQNT_Install](https://github.com/Mzdyl/LiteLoaderQQNT_Install)                                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 自动打包状态        | [![状态：release](https://img.shields.io/github/actions/workflow/status/ltxhhz/LL-plugin-list-viewer/release.yml?logo=github)](https://github.com/ltxhhz/LL-plugin-list-viewer/actions) |
+| 总下载量            | ![download](https://img.shields.io/github/downloads/ltxhhz/LL-plugin-list-viewer/total?logo=github)                                                                                  |
+| 最新版本            | [![version](https://img.shields.io/github/v/release/ltxhhz/LL-plugin-list-viewer?logo=github)](https://github.com/ltxhhz/LL-plugin-list-viewer/releases)                                |
 
 ## 功能
 
@@ -31,6 +31,9 @@
 ## 使用方法
 
 支持 LiteLoader 1.x
+
+**v1.5.0+** 推荐打开此开关以使用 `github.io` 域名作为数据来源，可以加快访问和列表加载速度，但数据有小于两小时的缓存时间。
+![setting](./imgs/3.png)
 
 ### 下载发行版
 
@@ -72,7 +75,7 @@ npm run build
 
 > 暂时没有计划修复或无法修复
 
-- 查询慢或者不稳，因为内置的几个镜像是随机使用，可以重新刷新或安装以使用另一个接口
+- 查询慢或者不稳，因为内置的几个镜像是随机使用，可以重新刷新或安装以使用另一个接口或使用 `github.io` 作为数据来源
 - ~~dialog 展示一次后列表顶部多出一部分空白，并且出现折叠图标，点击无效，同样是 LiteLoader 的组件，可能是 dialog 导致样式改变~~
   [已修复#266](https://github.com/LiteLoaderQQNT/LiteLoaderQQNT/issues/266)
 - release 更新时需要调用 `api.github.com` ，但没有镜像可用，可能需要配合代理
