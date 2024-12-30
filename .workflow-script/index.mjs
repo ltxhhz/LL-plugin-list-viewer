@@ -48,7 +48,7 @@ async function main() {
                 const pkg = JSON.parse(res.text)
                 const obj = pkg.liteloader_manifest
                 if (obj) {
-                  obj.version = pkg.versionre
+                  obj.version = pkg.version
                   obj.description = pkg.description
                   obj.authors =
                     typeof pkg.author === 'string'
