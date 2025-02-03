@@ -19,8 +19,7 @@ jobs:
           node-version: '20'
       - name: Setup pnpm
         run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
+          npm i -g pnpm
       - name: Get pnpm store path
         id: pnpm-cache-path
         run: echo "storePath=$(pnpm store path)" >> $GITHUB_ENV
