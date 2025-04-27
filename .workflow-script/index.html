@@ -80,7 +80,7 @@
       const useTemplate = (repo, manifest) => {
         /**@type {HTMLDivElement}*/
         const clone = templateEl.cloneNode(true)
-        if (manifest) {
+        if (manifest && manifest != 404) {
           clone.innerHTML = clone.innerHTML
             .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${manifest?.name}</a>`)
             .replace('#版本', manifest.version)
@@ -103,7 +103,7 @@
         } else {
           clone.innerHTML = clone.innerHTML
             .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${repo}</a>`)
-            .replace('#说明', '获取失败')
+            .replace('#说明', manifest == 404 ? '疑似跑路' : '获取失败')
         }
         return clone
       }
