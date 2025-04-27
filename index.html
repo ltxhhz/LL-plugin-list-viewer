@@ -102,8 +102,13 @@
           clone.dataset.slug = manifest.slug
         } else {
           clone.innerHTML = clone.innerHTML
+            .replace('#图标', defaultIcon)
             .replace('#标题', `<a class="underline hover:text-blue-500 duration-300" href="https://github.com/${repo}" target="_blank">${repo}</a>`)
-            .replace('#说明', manifest == 404 ? '疑似跑路' : '获取失败')
+            .replace('#说明', '获取失败')
+          if (manifest == 404) {
+            clone.classList.remove('bg-white')
+            clone.classList.add('bg-red-100')
+          }
         }
         return clone
       }
