@@ -80,6 +80,17 @@ npm run build
   [已修复#266](https://github.com/LiteLoaderQQNT/LiteLoaderQQNT/issues/266)
 - release 更新时需要调用 `api.github.com` ，但没有镜像可用，可能需要配合代理
 
+## Star History
+
+<a href="https://www.star-history.com/#ltxhhz/LL-plugin-list-viewer&type=timeline&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ltxhhz/LL-plugin-list-viewer&type=timeline&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ltxhhz/LL-plugin-list-viewer&type=timeline&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ltxhhz/LL-plugin-list-viewer&type=timeline&legend=top-left" />
+ </picture>
+</a>
+
+
 ## 鸣谢
 
 - [ltxhhz](https://github.com/ltxhhz) 辛苦我了

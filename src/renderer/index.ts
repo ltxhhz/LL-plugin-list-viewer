@@ -549,6 +549,7 @@ function createItemComponent(innerHtml: string, showInstallDialog: () => Promise
                   this.dataset.inactive = '0'
                   config.inactivePlugins = config.inactivePlugins.filter(e => e !== this.manifest!.slug)
                 }
+                delete this.dataset.update
                 this.updateOpenDirEvent()
               } else {
                 showDialog({ title: '卸载失败', message: res.message, type: 'message' })
